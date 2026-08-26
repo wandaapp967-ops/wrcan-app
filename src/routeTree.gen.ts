@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as TrainingRouteImport } from './routes/training'
+import { Route as AuthenticatedCertificatesRouteImport } from './routes/_authenticated/certificates'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as JobsJobIdRouteImport } from './routes/jobs.$jobId'
 import { Route as TrainingModuleIdRouteImport } from './routes/training.$moduleId'
@@ -42,6 +43,12 @@ const TrainingRoute = TrainingRouteImport.update({
   path: '/training',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedCertificatesRoute =
+  AuthenticatedCertificatesRouteImport.update({
+    id: '/certificates',
+    path: '/certificates',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -63,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/jobs': typeof JobsRouteWithChildren
   '/training': typeof TrainingRouteWithChildren
+  '/certificates': typeof AuthenticatedCertificatesRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/jobs/$jobId': typeof JobsJobIdRoute
   '/training/$moduleId': typeof TrainingModuleIdRoute
@@ -72,6 +80,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/jobs': typeof JobsRouteWithChildren
   '/training': typeof TrainingRouteWithChildren
+  '/certificates': typeof AuthenticatedCertificatesRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/jobs/$jobId': typeof JobsJobIdRoute
   '/training/$moduleId': typeof TrainingModuleIdRoute
@@ -83,6 +92,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/jobs': typeof JobsRouteWithChildren
   '/training': typeof TrainingRouteWithChildren
+  '/_authenticated/certificates': typeof AuthenticatedCertificatesRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/jobs/$jobId': typeof JobsJobIdRoute
   '/training/$moduleId': typeof TrainingModuleIdRoute
@@ -94,6 +104,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/jobs'
     | '/training'
+    | '/certificates'
     | '/profile'
     | '/jobs/$jobId'
     | '/training/$moduleId'
@@ -103,6 +114,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/jobs'
     | '/training'
+    | '/certificates'
     | '/profile'
     | '/jobs/$jobId'
     | '/training/$moduleId'
@@ -113,6 +125,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/jobs'
     | '/training'
+    | '/_authenticated/certificates'
     | '/_authenticated/profile'
     | '/jobs/$jobId'
     | '/training/$moduleId'
@@ -163,6 +176,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrainingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/certificates': {
+      id: '/_authenticated/certificates'
+      path: '/certificates'
+      fullPath: '/certificates'
+      preLoaderRoute: typeof AuthenticatedCertificatesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
       path: '/profile'
@@ -188,10 +208,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCertificatesRoute: typeof AuthenticatedCertificatesRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCertificatesRoute: AuthenticatedCertificatesRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
 }
 
