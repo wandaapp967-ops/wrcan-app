@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import {
   ArrowLeft,
   Camera,
-  FileText,
   MapPin,
   Mic,
   Paperclip,
