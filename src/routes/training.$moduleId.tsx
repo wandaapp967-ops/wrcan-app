@@ -100,7 +100,10 @@ function ModulePage() {
       .from("enrollments")
       .insert({ user_id: user.id, module_id: mod.id, status: "in_progress", progress: 10 });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     void qc.invalidateQueries({ queryKey: ["enrollment", moduleId, user.id] });
     toast.success("Enrolled. Your journey begins.");
   };
@@ -132,7 +135,10 @@ function ModulePage() {
       });
     }
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     void qc.invalidateQueries({ queryKey: ["enrollment", moduleId, user.id] });
     if (done) {
       toast.success("Module complete — certificate issued.");

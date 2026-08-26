@@ -12,8 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as TrainingRouteImport } from './routes/training'
+import { Route as AuthenticatedCertificatesRouteImport } from './routes/_authenticated/certificates'
+import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as JobsJobIdRouteImport } from './routes/jobs.$jobId'
+import { Route as TrainingModuleIdRouteImport } from './routes/training.$moduleId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -29,56 +34,121 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JobsRoute = JobsRouteImport.update({
+  id: '/jobs',
+  path: '/jobs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TrainingRoute = TrainingRouteImport.update({
   id: '/training',
   path: '/training',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedCertificatesRoute =
+  AuthenticatedCertificatesRouteImport.update({
+    id: '/certificates',
+    path: '/certificates',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedChatRoute = AuthenticatedChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const JobsJobIdRoute = JobsJobIdRouteImport.update({
+  id: '/$jobId',
+  path: '/$jobId',
+  getParentRoute: () => JobsRoute,
+} as any)
+const TrainingModuleIdRoute = TrainingModuleIdRouteImport.update({
+  id: '/$moduleId',
+  path: '/$moduleId',
+  getParentRoute: () => TrainingRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/training': typeof TrainingRoute
+  '/jobs': typeof JobsRouteWithChildren
+  '/training': typeof TrainingRouteWithChildren
+  '/certificates': typeof AuthenticatedCertificatesRoute
+  '/chat': typeof AuthenticatedChatRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/jobs/$jobId': typeof JobsJobIdRoute
+  '/training/$moduleId': typeof TrainingModuleIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/training': typeof TrainingRoute
+  '/jobs': typeof JobsRouteWithChildren
+  '/training': typeof TrainingRouteWithChildren
+  '/certificates': typeof AuthenticatedCertificatesRoute
+  '/chat': typeof AuthenticatedChatRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/jobs/$jobId': typeof JobsJobIdRoute
+  '/training/$moduleId': typeof TrainingModuleIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/training': typeof TrainingRoute
+  '/jobs': typeof JobsRouteWithChildren
+  '/training': typeof TrainingRouteWithChildren
+  '/_authenticated/certificates': typeof AuthenticatedCertificatesRoute
+  '/_authenticated/chat': typeof AuthenticatedChatRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/jobs/$jobId': typeof JobsJobIdRoute
+  '/training/$moduleId': typeof TrainingModuleIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/training' | '/profile'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/jobs'
+    | '/training'
+    | '/certificates'
+    | '/chat'
+    | '/profile'
+    | '/jobs/$jobId'
+    | '/training/$moduleId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/training' | '/profile'
+  to:
+    | '/'
+    | '/auth'
+    | '/jobs'
+    | '/training'
+    | '/certificates'
+    | '/chat'
+    | '/profile'
+    | '/jobs/$jobId'
+    | '/training/$moduleId'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/jobs'
     | '/training'
+    | '/_authenticated/certificates'
+    | '/_authenticated/chat'
     | '/_authenticated/profile'
+    | '/jobs/$jobId'
+    | '/training/$moduleId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  TrainingRoute: typeof TrainingRoute
+  JobsRoute: typeof JobsRouteWithChildren
+  TrainingRoute: typeof TrainingRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -104,12 +174,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/jobs': {
+      id: '/jobs'
+      path: '/jobs'
+      fullPath: '/jobs'
+      preLoaderRoute: typeof JobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/training': {
       id: '/training'
       path: '/training'
       fullPath: '/training'
       preLoaderRoute: typeof TrainingRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/certificates': {
+      id: '/_authenticated/certificates'
+      path: '/certificates'
+      fullPath: '/certificates'
+      preLoaderRoute: typeof AuthenticatedCertificatesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/chat': {
+      id: '/_authenticated/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof AuthenticatedChatRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
@@ -118,25 +209,66 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/jobs/$jobId': {
+      id: '/jobs/$jobId'
+      path: '/$jobId'
+      fullPath: '/jobs/$jobId'
+      preLoaderRoute: typeof JobsJobIdRouteImport
+      parentRoute: typeof JobsRoute
+    }
+    '/training/$moduleId': {
+      id: '/training/$moduleId'
+      path: '/$moduleId'
+      fullPath: '/training/$moduleId'
+      preLoaderRoute: typeof TrainingModuleIdRouteImport
+      parentRoute: typeof TrainingRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCertificatesRoute: typeof AuthenticatedCertificatesRoute
+  AuthenticatedChatRoute: typeof AuthenticatedChatRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCertificatesRoute: AuthenticatedCertificatesRoute,
+  AuthenticatedChatRoute: AuthenticatedChatRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface JobsRouteChildren {
+  JobsJobIdRoute: typeof JobsJobIdRoute
+}
+
+const JobsRouteChildren: JobsRouteChildren = {
+  JobsJobIdRoute: JobsJobIdRoute,
+}
+
+const JobsRouteWithChildren = JobsRoute._addFileChildren(JobsRouteChildren)
+
+interface TrainingRouteChildren {
+  TrainingModuleIdRoute: typeof TrainingModuleIdRoute
+}
+
+const TrainingRouteChildren: TrainingRouteChildren = {
+  TrainingModuleIdRoute: TrainingModuleIdRoute,
+}
+
+const TrainingRouteWithChildren = TrainingRoute._addFileChildren(
+  TrainingRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
-  TrainingRoute: TrainingRoute,
+  JobsRoute: JobsRouteWithChildren,
+  TrainingRoute: TrainingRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
