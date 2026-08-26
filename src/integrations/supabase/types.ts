@@ -194,6 +194,157 @@ export type Database = {
         }
         Relationships: []
       }
+      donation_campaigns: {
+        Row: {
+          beneficiaries: number
+          category: string
+          cover_url: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string
+          ends_at: string | null
+          goal_amount: number
+          id: string
+          is_active: boolean
+          slug: string
+          starts_at: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          beneficiaries?: number
+          category?: string
+          cover_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string
+          ends_at?: string | null
+          goal_amount?: number
+          id?: string
+          is_active?: boolean
+          slug: string
+          starts_at?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          beneficiaries?: number
+          category?: string
+          cover_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string
+          ends_at?: string | null
+          goal_amount?: number
+          id?: string
+          is_active?: boolean
+          slug?: string
+          starts_at?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      donations: {
+        Row: {
+          amount: number
+          campaign_id: string | null
+          created_at: string
+          currency: string
+          donor_name: string
+          donor_type: Database["public"]["Enums"]["donor_type"]
+          donor_user_id: string | null
+          id: string
+          is_anonymous: boolean
+          is_recurring: boolean
+          message: string | null
+          method: string
+          reference: string | null
+          status: Database["public"]["Enums"]["donation_status"]
+        }
+        Insert: {
+          amount: number
+          campaign_id?: string | null
+          created_at?: string
+          currency?: string
+          donor_name?: string
+          donor_type?: Database["public"]["Enums"]["donor_type"]
+          donor_user_id?: string | null
+          id?: string
+          is_anonymous?: boolean
+          is_recurring?: boolean
+          message?: string | null
+          method?: string
+          reference?: string | null
+          status?: Database["public"]["Enums"]["donation_status"]
+        }
+        Update: {
+          amount?: number
+          campaign_id?: string | null
+          created_at?: string
+          currency?: string
+          donor_name?: string
+          donor_type?: Database["public"]["Enums"]["donor_type"]
+          donor_user_id?: string | null
+          id?: string
+          is_anonymous?: boolean
+          is_recurring?: boolean
+          message?: string | null
+          method?: string
+          reference?: string | null
+          status?: Database["public"]["Enums"]["donation_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donations_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "donation_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      donor_contacts: {
+        Row: {
+          company_registration: string | null
+          contact_name: string | null
+          created_at: string
+          donation_id: string
+          email: string | null
+          id: string
+          phone: string | null
+        }
+        Insert: {
+          company_registration?: string | null
+          contact_name?: string | null
+          created_at?: string
+          donation_id: string
+          email?: string | null
+          id?: string
+          phone?: string | null
+        }
+        Update: {
+          company_registration?: string | null
+          contact_name?: string | null
+          created_at?: string
+          donation_id?: string
+          email?: string | null
+          id?: string
+          phone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donor_contacts_donation_id_fkey"
+            columns: ["donation_id"]
+            isOneToOne: false
+            referencedRelation: "donations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enrollments: {
         Row: {
           completed_at: string | null
@@ -588,6 +739,8 @@ export type Database = {
         | "offered"
         | "placed"
         | "rejected"
+      donation_status: "pending" | "completed" | "failed" | "refunded"
+      donor_type: "individual" | "company" | "foundation" | "government" | "ngo"
       enrollment_status: "enrolled" | "in_progress" | "completed" | "withdrawn"
       member_type: "student" | "jobseeker" | "recruiter" | "caterer"
       message_kind:
@@ -734,6 +887,8 @@ export const Constants = {
         "placed",
         "rejected",
       ],
+      donation_status: ["pending", "completed", "failed", "refunded"],
+      donor_type: ["individual", "company", "foundation", "government", "ngo"],
       enrollment_status: ["enrolled", "in_progress", "completed", "withdrawn"],
       member_type: ["student", "jobseeker", "recruiter", "caterer"],
       message_kind: [
