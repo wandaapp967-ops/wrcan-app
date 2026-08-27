@@ -216,30 +216,154 @@ function ModulePage() {
               </div>
               <p className="text-xs tracking-widest text-muted-foreground uppercase">
                 {enrollment.progress}% · {enrollment.status.replace("_", " ")}
+                {enrollment.score !== null ? ` · ${enrollment.score}%` : ""}
               </p>
-              {enrollment.status !== "completed" ? (
+              {enrollment.status === "completed" ? (
+                <RoseButton className="w-full" onClick={() => void navigate({ to: "/certificates" })}>
+                  View certificate
+                </RoseButton>
+              ) : null}
+            </>
+          )}
+        </Plate>
+
+        {enrollment ? (
+          <>
+            <Plate className="space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="font-display text-lg font-semibold">Course content</h2>
+                <span className="text-[0.6rem] tracking-widest text-muted-foreground uppercase">
+                  Lesson {lessonIndex + 1} of {lessons.length}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {lessons.map((l, i) => (
+                  <button
+                    key={l.title}
+                    onClick={() => setLessonIndex(i)}
+                    className={`rounded-full border px-3 py-1 text-[0.6rem] tracking-widest uppercase transition-colors ${
+                      i === lessonIndex
+                        ? "border-primary bg-primary/15 text-primary"
+                        : "border-primary/30 text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+              </div>
+
+              <div>
+                <h3 className="font-display text-base font-semibold">{lesson.title}</h3>
+                {lesson.body.map((p) => (
+                  <p key={p} className="mt-2 text-sm text-muted-foreground">
+                    {p}
+                  </p>
+                ))}
+                <ul className="mt-3 space-y-1 text-xs text-foreground">
+                  {lesson.takeaways.map((t) => (
+                    <li key={t}>✓ {t}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="flex gap-2">
+                <RoseButton
+                  variant="outline"
+                  className="flex-1"
+                  disabled={lessonIndex === 0}
+                  onClick={() => setLessonIndex((i) => Math.max(0, i - 1))}
+                >
+                  Back
+                </RoseButton>
+                <RoseButton
+                  className="flex-1"
+                  disabled={busy}
+                  onClick={() => {
+                    if (lessonIndex < lessons.length - 1) {
+                      const next = lessonIndex + 1;
+                      setLessonIndex(next);
+                      void saveProgress(Math.round(((next + 1) / (lessons.length + 1)) * 100));
+                    } else {
+                      setQuizOpen(true);
+                      void saveProgress(90);
+                    }
+                  }}
+                >
+                  {lessonIndex < lessons.length - 1 ? "Next lesson" : "Start assessment"}
+                </RoseButton>
+              </div>
+            </Plate>
+
+            {quizOpen || enrollment.status === "completed" ? (
+              <Plate className="space-y-4">
+                <h2 className="font-display text-lg font-semibold">Final assessment</h2>
+                <p className="text-xs tracking-widest text-muted-foreground uppercase">
+                  {quiz.length} questions · pass mark 60%
+                </p>
+
+                {quiz.map((question, qi) => (
+                  <div key={question.q} className="space-y-2">
+                    <p className="text-sm font-medium text-foreground">
+                      {qi + 1}. {question.q}
+                    </p>
+                    <div className="space-y-1">
+                      {question.options.map((opt, oi) => {
+                        const chosen = answers[qi] === oi;
+                        const graded = result !== null;
+                        const correct = oi === question.answer;
+                        return (
+                          <button
+                            key={opt}
+                            disabled={graded}
+                            onClick={() => setAnswers((a) => ({ ...a, [qi]: oi }))}
+                            className={`block w-full rounded-lg border px-3 py-2 text-left text-xs transition-colors ${
+                              graded && correct
+                                ? "border-primary bg-primary/15 text-primary"
+                                : chosen
+                                  ? "border-primary/70 bg-accent/40 text-foreground"
+                                  : "border-border text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            {opt}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+
+                {result !== null ? (
+                  <p className="text-sm font-semibold text-primary">
+                    You scored {result}% — {result >= 60 ? "passed" : "not yet, try again"}.
+                  </p>
+                ) : null}
+
                 <div className="flex gap-2">
                   <RoseButton
                     variant="outline"
                     className="flex-1"
-                    disabled={busy}
-                    onClick={() => advance(Math.min(90, enrollment.progress + 30))}
+                    onClick={() => {
+                      setAnswers({});
+                      setResult(null);
+                    }}
                   >
-                    Continue
+                    Reset answers
                   </RoseButton>
-                  <RoseButton className="flex-1" disabled={busy} onClick={() => advance(100)}>
-                    Complete & certify
+                  <RoseButton
+                    className="flex-1"
+                    disabled={busy || Object.keys(answers).length < quiz.length}
+                    onClick={submitQuiz}
+                  >
+                    Submit assessment
                   </RoseButton>
                 </div>
-              ) : (
-                <RoseButton className="w-full" onClick={() => void navigate({ to: "/certificates" })}>
-                  View certificate
-                </RoseButton>
-              )}
-            </>
-          )}
-        </Plate>
+              </Plate>
+            ) : null}
+          </>
+        ) : null}
       </div>
     </Shell>
   );
 }
+
