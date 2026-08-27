@@ -51,6 +51,10 @@ function ModulePage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [busy, setBusy] = useState(false);
+  const [lessonIndex, setLessonIndex] = useState(0);
+  const [quizOpen, setQuizOpen] = useState(false);
+  const [answers, setAnswers] = useState<Record<number, number>>({});
+  const [result, setResult] = useState<number | null>(null);
 
   const { data: mod } = useQuery({
     queryKey: ["training_module", moduleId],
@@ -80,6 +84,9 @@ function ModulePage() {
     },
   });
 
+  const lessons = useMemo(() => (mod ? buildLessons(mod) : []), [mod]);
+  const quiz = useMemo(() => (mod ? buildQuiz(mod) : []), [mod]);
+
   if (!mod) {
     return (
       <Shell title="Training">
@@ -89,6 +96,7 @@ function ModulePage() {
   }
 
   const match = matchModule(profile, mod);
+  const lesson = lessons[Math.min(lessonIndex, lessons.length - 1)]!;
 
   const enrol = async () => {
     if (!user) {
@@ -108,22 +116,45 @@ function ModulePage() {
     toast.success("Enrolled. Your journey begins.");
   };
 
-  const advance = async (progress: number) => {
-    if (!user || !enrollment) return;
+  const saveProgress = async (progress: number) => {
+    if (!user || !enrollment || enrollment.status === "completed") return;
+    if (progress <= enrollment.progress) return;
     setBusy(true);
-    const done = progress >= 100;
-    const score = done ? 78 + Math.floor(Math.random() * 20) : null;
+    const { error } = await supabase
+      .from("enrollments")
+      .update({ progress, status: "in_progress" })
+      .eq("id", enrollment.id);
+    setBusy(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    void qc.invalidateQueries({ queryKey: ["enrollment", moduleId, user.id] });
+  };
+
+  const submitQuiz = async () => {
+    if (!user || !enrollment) return;
+    const correct = quiz.reduce((n, q, i) => (answers[i] === q.answer ? n + 1 : n), 0);
+    const score = Math.round((correct / quiz.length) * 100);
+    setResult(score);
+
+    if (score < 60) {
+      toast.error(`Scored ${score}% — 60% needed. Review the lessons and try again.`);
+      return;
+    }
+
+    setBusy(true);
     const { error } = await supabase
       .from("enrollments")
       .update({
-        progress,
-        status: done ? "completed" : "in_progress",
-        completed_at: done ? new Date().toISOString() : null,
+        progress: 100,
+        status: "completed",
+        completed_at: new Date().toISOString(),
         score,
       })
       .eq("id", enrollment.id);
 
-    if (!error && done) {
+    if (!error) {
       await supabase.from("certificates").insert({
         user_id: user.id,
         module_id: mod.id,
@@ -140,13 +171,10 @@ function ModulePage() {
       return;
     }
     void qc.invalidateQueries({ queryKey: ["enrollment", moduleId, user.id] });
-    if (done) {
-      toast.success("Module complete — certificate issued.");
-      void navigate({ to: "/certificates" });
-    } else {
-      toast.success("Progress saved.");
-    }
+    toast.success(`Passed with ${score}% — certificate issued.`);
+    void navigate({ to: "/certificates" });
   };
+
 
   return (
     <Shell title={mod.title} subtitle={mod.provider}>
