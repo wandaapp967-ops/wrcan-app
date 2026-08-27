@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { buildLessons, buildQuiz } from "@/lib/curriculum";
 import { toast } from "sonner";
 import { Shell } from "@/components/Shell";
 import { MatchRing, Plate, RoseButton } from "@/components/EmpireUI";
