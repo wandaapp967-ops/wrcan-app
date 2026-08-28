@@ -99,6 +99,39 @@ function ModulePage() {
   const match = matchModule(profile, mod);
   const lesson = lessons[Math.min(lessonIndex, lessons.length - 1)]!;
 
+  const downloadManual = () => {
+    const esc = (s: string) =>
+      s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(mod.title)} — Training Manual</title>
+<style>
+ body{font-family:Georgia,serif;background:#0d0d0d;color:#f5e6b8;margin:0;padding:48px;}
+ h1{font-size:30px;color:#e8c25a;margin:0 0 4px;}
+ h2{font-size:19px;color:#e8c25a;border-bottom:1px solid #8a6c22;padding-bottom:6px;margin-top:34px;}
+ p,li{font-size:14px;line-height:1.65;color:#efe3c4;}
+ .meta{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#c9a94a;}
+ @media print{body{background:#fff;color:#222}h1,h2{color:#8a6c22}p,li{color:#222}}
+</style></head><body>
+<h1>${esc(mod.title)}</h1>
+<p class="meta">${esc(mod.provider)}${mod.accrediting_body ? " · " + esc(mod.accrediting_body) : ""} · ${mod.duration_hours}h${mod.nqf_level ? " · NQF " + mod.nqf_level : ""}</p>
+<p>${esc(mod.description)}</p>
+${lessons
+  .map(
+    (l, i) => `<h2>Unit ${i + 1}: ${esc(l.title)}</h2>${l.body.map((b) => `<p>${esc(b)}</p>`).join("")}<ul>${l.takeaways.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>`,
+  )
+  .join("")}
+<h2>Assessment preparation</h2><ol>${quiz.map((q) => `<li>${esc(q.q)}</li>`).join("")}</ol>
+<p class="meta">Wanda Recruitment &amp; Catering Agency · Nationwide</p>
+</body></html>`;
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${mod.title.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-manual.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+
   const enrol = async () => {
     if (!user) {
       void navigate({ to: "/auth" });
@@ -216,17 +249,23 @@ function ModulePage() {
               ))}
             </p>
           ) : null}
-          {mod.manual_url ? (
-            <a
-              href={mod.manual_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 inline-block text-xs tracking-widest text-primary uppercase underline"
-            >
-              Open training manual
-            </a>
-          ) : null}
+          <div className="mt-3 flex flex-wrap gap-2">
+            {mod.manual_url ? (
+              <a
+                href={mod.manual_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block text-xs tracking-widest text-primary uppercase underline"
+              >
+                Open external manual
+              </a>
+            ) : null}
+            <RoseButton variant="outline" onClick={downloadManual}>
+              Download training manual
+            </RoseButton>
+          </div>
         </Plate>
+
 
         <Plate className="space-y-3">
           <h2 className="font-display text-lg font-semibold">Your progress</h2>

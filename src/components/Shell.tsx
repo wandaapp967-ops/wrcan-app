@@ -1,8 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Briefcase, GraduationCap, Home, MessageCircle, User } from "lucide-react";
 import type { ReactNode } from "react";
-import marble from "@/assets/marble-bg.jpg";
-import logo from "@/assets/wrcan-logo.png";
+import logoAsset from "@/assets/wanda-logo.png.asset.json";
 
 const NAV = [
   { to: "/", label: "Empire", icon: Home },
@@ -26,17 +25,15 @@ export function Shell({
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
-    <div
-      className="marble-page relative min-h-screen"
-      style={{ backgroundImage: `url(${marble})` }}
-    >
-      <div className="absolute inset-0 bg-background/55" aria-hidden />
+    <div className="gold-pattern relative min-h-screen">
+      <div className="absolute inset-0 bg-background/40" aria-hidden />
       <div className="relative mx-auto flex min-h-screen w-full max-w-2xl flex-col">
         {!bare && (
           <header className="px-5 pt-6 pb-3 text-center">
             <Link to="/" className="inline-block">
-              <img src={logo} alt="WRCAN Specialists" width={1152} height={576} className="mx-auto h-12 w-auto" />
+              <img src={logoAsset.url} alt="Wanda Recruitment and Catering Agency" className="mx-auto h-20 w-auto" />
             </Link>
+
             {title ? (
               <>
                 <h1 className="font-display rose-text mt-3 text-2xl font-semibold tracking-wide uppercase">
