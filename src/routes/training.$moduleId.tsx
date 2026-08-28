@@ -216,17 +216,23 @@ function ModulePage() {
               ))}
             </p>
           ) : null}
-          {mod.manual_url ? (
-            <a
-              href={mod.manual_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 inline-block text-xs tracking-widest text-primary uppercase underline"
-            >
-              Open training manual
-            </a>
-          ) : null}
+          <div className="mt-3 flex flex-wrap gap-2">
+            {mod.manual_url ? (
+              <a
+                href={mod.manual_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block text-xs tracking-widest text-primary uppercase underline"
+              >
+                Open external manual
+              </a>
+            ) : null}
+            <RoseButton variant="outline" onClick={downloadManual}>
+              Download training manual
+            </RoseButton>
+          </div>
         </Plate>
+
 
         <Plate className="space-y-3">
           <h2 className="font-display text-lg font-semibold">Your progress</h2>
