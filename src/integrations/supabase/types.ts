@@ -125,6 +125,44 @@ export type Database = {
           },
         ]
       }
+      conversation_settings: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          id: string
+          is_muted: boolean
+          is_pinned: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          id?: string
+          is_muted?: boolean
+          is_pinned?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          is_muted?: boolean
+          is_pinned?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_settings_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
           avatar_url: string | null
@@ -191,6 +229,36 @@ export type Database = {
           purpose?: string | null
           record_count?: number | null
           status?: string
+        }
+        Relationships: []
+      }
+      device_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          platform: string
+          token: string
+          updated_at: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          platform?: string
+          token: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          platform?: string
+          token?: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -458,11 +526,98 @@ export type Database = {
         }
         Relationships: []
       }
+      live_locations: {
+        Row: {
+          accuracy: number | null
+          conversation_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          latitude: number
+          longitude: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accuracy?: number | null
+          conversation_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          latitude: number
+          longitude: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accuracy?: number | null
+          conversation_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          latitude?: number
+          longitude?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_locations_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_receipts: {
+        Row: {
+          conversation_id: string
+          delivered_at: string
+          id: string
+          message_id: string
+          read_at: string | null
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          delivered_at?: string
+          id?: string
+          message_id: string
+          read_at?: string | null
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          delivered_at?: string
+          id?: string
+          message_id?: string
+          read_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_receipts_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_receipts_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           body: string | null
           conversation_id: string
           created_at: string
+          deleted_at: string | null
           duration_ms: number | null
           id: string
           kind: Database["public"]["Enums"]["message_kind"]
@@ -478,6 +633,7 @@ export type Database = {
           body?: string | null
           conversation_id: string
           created_at?: string
+          deleted_at?: string | null
           duration_ms?: number | null
           id?: string
           kind?: Database["public"]["Enums"]["message_kind"]
@@ -493,6 +649,7 @@ export type Database = {
           body?: string | null
           conversation_id?: string
           created_at?: string
+          deleted_at?: string | null
           duration_ms?: number | null
           id?: string
           kind?: Database["public"]["Enums"]["message_kind"]
@@ -543,6 +700,7 @@ export type Database = {
           id: string
           is_public: boolean
           languages: string[]
+          last_seen_at: string
           member_type: Database["public"]["Enums"]["member_type"]
           phone: string | null
           province: string | null
@@ -570,6 +728,7 @@ export type Database = {
           id: string
           is_public?: boolean
           languages?: string[]
+          last_seen_at?: string
           member_type?: Database["public"]["Enums"]["member_type"]
           phone?: string | null
           province?: string | null
@@ -597,6 +756,7 @@ export type Database = {
           id?: string
           is_public?: boolean
           languages?: string[]
+          last_seen_at?: string
           member_type?: Database["public"]["Enums"]["member_type"]
           phone?: string | null
           province?: string | null
