@@ -90,7 +90,22 @@ function ChatPage() {
     };
   }, [user, qc]);
 
-  const active = conversations.find((c) => c.id === activeId) ?? null;
+  // The freshly created conversation may not be in the cached list yet — fetch it directly.
+  const { data: activeFallback = null } = useQuery({
+    queryKey: ["conversation", activeId],
+    enabled: !!activeId && !conversations.some((c) => c.id === activeId),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("conversations")
+        .select("*")
+        .eq("id", activeId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const active = conversations.find((c) => c.id === activeId) ?? activeFallback;
 
   if (active) {
     return (
