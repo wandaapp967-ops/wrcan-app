@@ -889,6 +889,10 @@ export type Database = {
         Args: { _conversation_id: string; _user_id: string }
         Returns: boolean
       }
+      start_direct_chat: {
+        Args: { _other_id: string; _title?: string }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "admin" | "recruiter" | "caterer" | "student" | "jobseeker"
