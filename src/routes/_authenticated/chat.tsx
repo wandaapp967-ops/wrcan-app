@@ -163,32 +163,16 @@ function NewChat({ onCreated }: { onCreated: (id: string) => void }) {
   const start = async (otherId: string, otherName: string) => {
     if (!user) return;
     setBusy(true);
-    const { data: conv, error } = await supabase
-      .from("conversations")
-      .insert({
-        created_by: user.id,
-        is_group: false,
-        title: `${profile?.full_name || "You"} & ${otherName}`,
-      })
-      .select("id")
-      .single();
-    if (error || !conv) {
-      setBusy(false);
+    const { data, error } = await supabase.rpc("start_direct_chat", {
+      _other_id: otherId,
+      _title: `${profile?.full_name || "You"} & ${otherName}`,
+    });
+    setBusy(false);
+    if (error || !data) {
       toast.error(error?.message ?? "Could not start the chat");
       return;
     }
-    const { error: pErr } = await supabase
-      .from("conversation_participants")
-      .insert([
-        { conversation_id: conv.id, user_id: user.id },
-        { conversation_id: conv.id, user_id: otherId },
-      ]);
-    setBusy(false);
-    if (pErr) {
-      toast.error(pErr.message);
-      return;
-    }
-    onCreated(conv.id);
+    onCreated(data as string);
   };
 
   return (
