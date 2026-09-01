@@ -8,13 +8,15 @@ const vapidKey = import.meta.env['VITE_LOVABLE_CONNECTOR_FIREBASE_MESSAGING_VAPI
   | undefined;
 
 const firebaseConfig = {
-  apiKey: import.meta.env['VITE_LOVABLE_CONNECTOR_FIREBASE_MESSAGING_WEB_API_KEY'] as
-    | string
-    | undefined,
-  projectId: import.meta.env['VITE_LOVABLE_CONNECTOR_FIREBASE_MESSAGING_PROJECT_ID'] as
-    | string
-    | undefined,
-  appId,
+  apiKey:
+    (import.meta.env['VITE_LOVABLE_CONNECTOR_FIREBASE_MESSAGING_WEB_API_KEY'] as
+      | string
+      | undefined) ?? "",
+  projectId:
+    (import.meta.env['VITE_LOVABLE_CONNECTOR_FIREBASE_MESSAGING_PROJECT_ID'] as
+      | string
+      | undefined) ?? "",
+  appId: appId ?? "",
   messagingSenderId: appId?.split(":")[1] ?? "",
 };
 
