@@ -128,7 +128,15 @@ function ChatPage() {
           <Plus className="h-4 w-4" /> Start a new chat
         </button>
 
-        {newChatOpen ? <NewChat onCreated={(id) => { setNewChatOpen(false); setActiveId(id); }} /> : null}
+        {newChatOpen ? (
+          <NewChat
+            onCreated={(id) => {
+              setNewChatOpen(false);
+              setActiveId(id);
+              void qc.invalidateQueries({ queryKey: ["conversations", user?.id] });
+            }}
+          />
+        ) : null}
 
         {conversations.length === 0 ? (
           <Plate className="text-center text-sm text-muted-foreground">
