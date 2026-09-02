@@ -94,6 +94,7 @@ function ProfilePage() {
     date_of_birth: "",
     gender: "",
     city: "",
+    suburb: "",
     province: "",
     highest_qualification: "",
     field_of_study: "",
