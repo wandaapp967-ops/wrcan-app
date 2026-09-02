@@ -162,6 +162,7 @@ function ProfilePage() {
       date_of_birth: form.date_of_birth || null,
       gender: form.gender || null,
       city: form.city.trim() || null,
+      suburb: form.suburb.trim() || null,
       province: form.province || null,
       highest_qualification: form.highest_qualification || null,
       field_of_study: form.field_of_study.trim() || null,
