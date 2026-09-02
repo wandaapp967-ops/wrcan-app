@@ -274,14 +274,28 @@ function ProfilePage() {
               </select>
             </Field>
           </div>
-          <Field label="City / township">
-            <input
-              className={inputClass}
-              value={form.city}
-              maxLength={80}
-              onChange={(e) => setForm({ ...form, city: e.target.value })}
-            />
-          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="City / township">
+              <input
+                className={inputClass}
+                value={form.city}
+                maxLength={80}
+                onChange={(e) => setForm({ ...form, city: e.target.value })}
+              />
+            </Field>
+            <Field label="Suburb / area">
+              <input
+                className={inputClass}
+                value={form.suburb}
+                maxLength={80}
+                placeholder="e.g. Dobsonville"
+                onChange={(e) => setForm({ ...form, suburb: e.target.value })}
+              />
+            </Field>
+          </div>
+          <p className="text-[0.65rem] tracking-widest text-muted-foreground uppercase">
+            Your area places you in the local seekers chat group automatically.
+          </p>
         </Plate>
 
         <Plate className="space-y-3">
