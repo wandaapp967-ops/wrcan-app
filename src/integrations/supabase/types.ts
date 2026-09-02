@@ -165,6 +165,7 @@ export type Database = {
       }
       conversations: {
         Row: {
+          area_key: string | null
           avatar_url: string | null
           created_at: string
           created_by: string | null
@@ -174,6 +175,7 @@ export type Database = {
           title: string | null
         }
         Insert: {
+          area_key?: string | null
           avatar_url?: string | null
           created_at?: string
           created_by?: string | null
@@ -183,6 +185,7 @@ export type Database = {
           title?: string | null
         }
         Update: {
+          area_key?: string | null
           avatar_url?: string | null
           created_at?: string
           created_by?: string | null
@@ -705,6 +708,7 @@ export type Database = {
           phone: string | null
           province: string | null
           skills: string[]
+          suburb: string | null
           updated_at: string
         }
         Insert: {
@@ -733,6 +737,7 @@ export type Database = {
           phone?: string | null
           province?: string | null
           skills?: string[]
+          suburb?: string | null
           updated_at?: string
         }
         Update: {
@@ -761,9 +766,39 @@ export type Database = {
           phone?: string | null
           province?: string | null
           skills?: string[]
+          suburb?: string | null
           updated_at?: string
         }
         Relationships: []
+      }
+      reel_likes: {
+        Row: {
+          created_at: string
+          id: string
+          reel_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reel_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reel_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reel_likes_reel_id_fkey"
+            columns: ["reel_id"]
+            isOneToOne: false
+            referencedRelation: "talent_reels"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       service_ratings: {
         Row: {
@@ -789,6 +824,96 @@ export type Database = {
           id?: string
           stars?: number
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      status_posts: {
+        Row: {
+          background: string | null
+          body: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          kind: string
+          media_mime: string | null
+          media_path: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          background?: string | null
+          body?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          kind?: string
+          media_mime?: string | null
+          media_path?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          background?: string | null
+          body?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          kind?: string
+          media_mime?: string | null
+          media_path?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      talent_reels: {
+        Row: {
+          area: string | null
+          caption: string | null
+          created_at: string
+          duration_ms: number | null
+          id: string
+          is_public: boolean
+          kind: string
+          media_mime: string | null
+          media_path: string
+          skill_tag: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          views: number
+        }
+        Insert: {
+          area?: string | null
+          caption?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          id?: string
+          is_public?: boolean
+          kind?: string
+          media_mime?: string | null
+          media_path: string
+          skill_tag?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          views?: number
+        }
+        Update: {
+          area?: string | null
+          caption?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          id?: string
+          is_public?: boolean
+          kind?: string
+          media_mime?: string | null
+          media_path?: string
+          skill_tag?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          views?: number
         }
         Relationships: []
       }
@@ -878,6 +1003,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      allocate_area_group: { Args: { _user_id: string }; Returns: string }
+      area_key_of: { Args: { _city: string; _suburb: string }; Returns: string }
+      area_label_of: {
+        Args: { _city: string; _suburb: string }
+        Returns: string
+      }
+      auto_allocate_area: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

@@ -14,10 +14,12 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DonorsRouteImport } from './routes/donors'
 import { Route as JobsRouteImport } from './routes/jobs'
+import { Route as ReelsRouteImport } from './routes/reels'
 import { Route as TrainingRouteImport } from './routes/training'
 import { Route as AuthenticatedCertificatesRouteImport } from './routes/_authenticated/certificates'
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedStatusRouteImport } from './routes/_authenticated/status'
 import { Route as JobsJobIdRouteImport } from './routes/jobs.$jobId'
 import { Route as TrainingModuleIdRouteImport } from './routes/training.$moduleId'
 
@@ -45,6 +47,11 @@ const JobsRoute = JobsRouteImport.update({
   path: '/jobs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReelsRoute = ReelsRouteImport.update({
+  id: '/reels',
+  path: '/reels',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TrainingRoute = TrainingRouteImport.update({
   id: '/training',
   path: '/training',
@@ -66,6 +73,11 @@ const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedStatusRoute = AuthenticatedStatusRouteImport.update({
+  id: '/status',
+  path: '/status',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const JobsJobIdRoute = JobsJobIdRouteImport.update({
   id: '/$jobId',
   path: '/$jobId',
@@ -82,10 +94,12 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/donors': typeof DonorsRoute
   '/jobs': typeof JobsRouteWithChildren
+  '/reels': typeof ReelsRoute
   '/training': typeof TrainingRouteWithChildren
   '/certificates': typeof AuthenticatedCertificatesRoute
   '/chat': typeof AuthenticatedChatRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/status': typeof AuthenticatedStatusRoute
   '/jobs/$jobId': typeof JobsJobIdRoute
   '/training/$moduleId': typeof TrainingModuleIdRoute
 }
@@ -94,10 +108,12 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/donors': typeof DonorsRoute
   '/jobs': typeof JobsRouteWithChildren
+  '/reels': typeof ReelsRoute
   '/training': typeof TrainingRouteWithChildren
   '/certificates': typeof AuthenticatedCertificatesRoute
   '/chat': typeof AuthenticatedChatRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/status': typeof AuthenticatedStatusRoute
   '/jobs/$jobId': typeof JobsJobIdRoute
   '/training/$moduleId': typeof TrainingModuleIdRoute
 }
@@ -108,10 +124,12 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/donors': typeof DonorsRoute
   '/jobs': typeof JobsRouteWithChildren
+  '/reels': typeof ReelsRoute
   '/training': typeof TrainingRouteWithChildren
   '/_authenticated/certificates': typeof AuthenticatedCertificatesRoute
   '/_authenticated/chat': typeof AuthenticatedChatRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/status': typeof AuthenticatedStatusRoute
   '/jobs/$jobId': typeof JobsJobIdRoute
   '/training/$moduleId': typeof TrainingModuleIdRoute
 }
@@ -122,10 +140,12 @@ export interface FileRouteTypes {
     | '/auth'
     | '/donors'
     | '/jobs'
+    | '/reels'
     | '/training'
     | '/certificates'
     | '/chat'
     | '/profile'
+    | '/status'
     | '/jobs/$jobId'
     | '/training/$moduleId'
   fileRoutesByTo: FileRoutesByTo
@@ -134,10 +154,12 @@ export interface FileRouteTypes {
     | '/auth'
     | '/donors'
     | '/jobs'
+    | '/reels'
     | '/training'
     | '/certificates'
     | '/chat'
     | '/profile'
+    | '/status'
     | '/jobs/$jobId'
     | '/training/$moduleId'
   id:
@@ -147,10 +169,12 @@ export interface FileRouteTypes {
     | '/auth'
     | '/donors'
     | '/jobs'
+    | '/reels'
     | '/training'
     | '/_authenticated/certificates'
     | '/_authenticated/chat'
     | '/_authenticated/profile'
+    | '/_authenticated/status'
     | '/jobs/$jobId'
     | '/training/$moduleId'
   fileRoutesById: FileRoutesById
@@ -161,6 +185,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DonorsRoute: typeof DonorsRoute
   JobsRoute: typeof JobsRouteWithChildren
+  ReelsRoute: typeof ReelsRoute
   TrainingRoute: typeof TrainingRouteWithChildren
 }
 
@@ -201,6 +226,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JobsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reels': {
+      id: '/reels'
+      path: '/reels'
+      fullPath: '/reels'
+      preLoaderRoute: typeof ReelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/training': {
       id: '/training'
       path: '/training'
@@ -229,6 +261,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/status': {
+      id: '/_authenticated/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof AuthenticatedStatusRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/jobs/$jobId': {
       id: '/jobs/$jobId'
       path: '/$jobId'
@@ -250,12 +289,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCertificatesRoute: typeof AuthenticatedCertificatesRoute
   AuthenticatedChatRoute: typeof AuthenticatedChatRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedStatusRoute: typeof AuthenticatedStatusRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCertificatesRoute: AuthenticatedCertificatesRoute,
   AuthenticatedChatRoute: AuthenticatedChatRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedStatusRoute: AuthenticatedStatusRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -289,6 +330,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DonorsRoute: DonorsRoute,
   JobsRoute: JobsRouteWithChildren,
+  ReelsRoute: ReelsRoute,
   TrainingRoute: TrainingRouteWithChildren,
 }
 export const routeTree = rootRouteImport

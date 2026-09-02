@@ -5,7 +5,7 @@ const cache = new Map<string, { url: string; expires: number }>();
 const inflight = new Map<string, Promise<string | null>>();
 
 export async function signedUrl(
-  bucket: "chat-media" | "avatars",
+  bucket: "chat-media" | "avatars" | "talent",
   path: string | null | undefined,
 ): Promise<string | null> {
   if (!path) return null;

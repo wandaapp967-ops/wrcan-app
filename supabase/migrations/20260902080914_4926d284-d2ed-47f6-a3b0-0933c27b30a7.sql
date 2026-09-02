@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.allocate_area_group(uuid) FROM authenticated;

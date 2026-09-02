@@ -94,6 +94,7 @@ function ProfilePage() {
     date_of_birth: "",
     gender: "",
     city: "",
+    suburb: "",
     province: "",
     highest_qualification: "",
     field_of_study: "",
@@ -118,6 +119,7 @@ function ProfilePage() {
       date_of_birth: profile.date_of_birth ?? "",
       gender: profile.gender ?? "",
       city: profile.city ?? "",
+      suburb: profile.suburb ?? "",
       province: profile.province ?? "",
       highest_qualification: profile.highest_qualification ?? "",
       field_of_study: profile.field_of_study ?? "",
@@ -160,6 +162,7 @@ function ProfilePage() {
       date_of_birth: form.date_of_birth || null,
       gender: form.gender || null,
       city: form.city.trim() || null,
+      suburb: form.suburb.trim() || null,
       province: form.province || null,
       highest_qualification: form.highest_qualification || null,
       field_of_study: form.field_of_study.trim() || null,
@@ -274,14 +277,28 @@ function ProfilePage() {
               </select>
             </Field>
           </div>
-          <Field label="City / township">
-            <input
-              className={inputClass}
-              value={form.city}
-              maxLength={80}
-              onChange={(e) => setForm({ ...form, city: e.target.value })}
-            />
-          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="City / township">
+              <input
+                className={inputClass}
+                value={form.city}
+                maxLength={80}
+                onChange={(e) => setForm({ ...form, city: e.target.value })}
+              />
+            </Field>
+            <Field label="Suburb / area">
+              <input
+                className={inputClass}
+                value={form.suburb}
+                maxLength={80}
+                placeholder="e.g. Dobsonville"
+                onChange={(e) => setForm({ ...form, suburb: e.target.value })}
+              />
+            </Field>
+          </div>
+          <p className="text-[0.65rem] tracking-widest text-muted-foreground uppercase">
+            Your area places you in the local seekers chat group automatically.
+          </p>
         </Plate>
 
         <Plate className="space-y-3">
