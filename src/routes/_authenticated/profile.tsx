@@ -119,6 +119,7 @@ function ProfilePage() {
       date_of_birth: profile.date_of_birth ?? "",
       gender: profile.gender ?? "",
       city: profile.city ?? "",
+      suburb: profile.suburb ?? "",
       province: profile.province ?? "",
       highest_qualification: profile.highest_qualification ?? "",
       field_of_study: profile.field_of_study ?? "",
