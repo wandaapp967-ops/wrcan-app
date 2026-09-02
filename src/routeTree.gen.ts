@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DonorsRouteImport } from './routes/donors'
 import { Route as JobsRouteImport } from './routes/jobs'
+import { Route as ReelsRouteImport } from './routes/reels'
 import { Route as TrainingRouteImport } from './routes/training'
 import { Route as AuthenticatedCertificatesRouteImport } from './routes/_authenticated/certificates'
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
@@ -44,6 +45,11 @@ const DonorsRoute = DonorsRouteImport.update({
 const JobsRoute = JobsRouteImport.update({
   id: '/jobs',
   path: '/jobs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReelsRoute = ReelsRouteImport.update({
+  id: '/reels',
+  path: '/reels',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TrainingRoute = TrainingRouteImport.update({
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/donors': typeof DonorsRoute
   '/jobs': typeof JobsRouteWithChildren
+  '/reels': typeof ReelsRoute
   '/training': typeof TrainingRouteWithChildren
   '/certificates': typeof AuthenticatedCertificatesRoute
   '/chat': typeof AuthenticatedChatRoute
@@ -101,6 +108,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/donors': typeof DonorsRoute
   '/jobs': typeof JobsRouteWithChildren
+  '/reels': typeof ReelsRoute
   '/training': typeof TrainingRouteWithChildren
   '/certificates': typeof AuthenticatedCertificatesRoute
   '/chat': typeof AuthenticatedChatRoute
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/donors': typeof DonorsRoute
   '/jobs': typeof JobsRouteWithChildren
+  '/reels': typeof ReelsRoute
   '/training': typeof TrainingRouteWithChildren
   '/_authenticated/certificates': typeof AuthenticatedCertificatesRoute
   '/_authenticated/chat': typeof AuthenticatedChatRoute
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/donors'
     | '/jobs'
+    | '/reels'
     | '/training'
     | '/certificates'
     | '/chat'
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/donors'
     | '/jobs'
+    | '/reels'
     | '/training'
     | '/certificates'
     | '/chat'
@@ -158,6 +169,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/donors'
     | '/jobs'
+    | '/reels'
     | '/training'
     | '/_authenticated/certificates'
     | '/_authenticated/chat'
@@ -173,6 +185,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DonorsRoute: typeof DonorsRoute
   JobsRoute: typeof JobsRouteWithChildren
+  ReelsRoute: typeof ReelsRoute
   TrainingRoute: typeof TrainingRouteWithChildren
 }
 
@@ -211,6 +224,13 @@ declare module '@tanstack/react-router' {
       path: '/jobs'
       fullPath: '/jobs'
       preLoaderRoute: typeof JobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reels': {
+      id: '/reels'
+      path: '/reels'
+      fullPath: '/reels'
+      preLoaderRoute: typeof ReelsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/training': {
@@ -310,6 +330,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DonorsRoute: DonorsRoute,
   JobsRoute: JobsRouteWithChildren,
+  ReelsRoute: ReelsRoute,
   TrainingRoute: TrainingRouteWithChildren,
 }
 export const routeTree = rootRouteImport
