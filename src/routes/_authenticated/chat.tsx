@@ -411,11 +411,27 @@ function ChatThread({
           );
         },
       )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "messages",
+          filter: `conversation_id=eq.${conversation.id}`,
+        },
+        (payload) => {
+          const updated = payload.new as Message;
+          qc.setQueryData<Message[]>(key, (prev = []) =>
+            prev.map((m) => (m.id === updated.id ? updated : m)),
+          );
+        },
+      )
       .subscribe();
     return () => {
       void supabase.removeChannel(channel);
     };
   }, [conversation.id, key, qc]);
+
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
