@@ -607,27 +607,119 @@ function ChatThread({
         </header>
 
         <div className="flex-1 space-y-2 overflow-y-auto px-3 py-4">
-          {messages.map((m) => {
-            const mine = m.sender_id === user?.id;
-            return (
-              <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                <div
-                  className={`max-w-[80%] rounded-2xl px-3 py-2 shadow-sm ${
-                    mine
-                      ? "rounded-br-sm bg-primary text-primary-foreground"
-                      : "rounded-bl-sm bg-card text-card-foreground"
-                  }`}
-                >
-                  <MessageBubbleBody message={m} />
-                  <span className="mt-1 block text-right text-[0.6rem] opacity-70">
-                    {timeOf(m.created_at)}
-                  </span>
+          {messages
+            .filter((m) => !m.deleted_at)
+            .map((m) => {
+              const mine = m.sender_id === user?.id;
+              return (
+                <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+                  <button
+                    type="button"
+                    onClick={() => setMenuFor(m)}
+                    className={`max-w-[80%] rounded-2xl px-3 py-2 text-left shadow-sm ${
+                      mine
+                        ? "rounded-br-sm bg-primary text-primary-foreground"
+                        : "rounded-bl-sm bg-card text-card-foreground"
+                    }`}
+                  >
+                    <MessageBubbleBody message={m} />
+                    <span className="mt-1 block text-right text-[0.6rem] opacity-70">
+                      {timeOf(m.created_at)}
+                    </span>
+                  </button>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
           <div ref={endRef} />
         </div>
+
+        {menuFor ? (
+          <div
+            className="fixed inset-0 z-50 flex items-end justify-center bg-background/70 backdrop-blur-sm"
+            onClick={() => setMenuFor(null)}
+          >
+            <div
+              className="glass-plate w-full max-w-2xl space-y-2 rounded-t-2xl p-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={() => void copyMessage(menuFor)}
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm hover:bg-accent/40"
+              >
+                <Copy className="h-4 w-4 text-primary" /> Copy
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setForwardFor(menuFor);
+                  setMenuFor(null);
+                }}
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm hover:bg-accent/40"
+              >
+                <Forward className="h-4 w-4 text-primary" /> Forward / move to another chat
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShareText(textOf(menuFor));
+                  setMenuFor(null);
+                }}
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm hover:bg-accent/40"
+              >
+                <Share2 className="h-4 w-4 text-primary" /> Share to social networks
+              </button>
+              {menuFor.sender_id === user?.id ? (
+                <button
+                  type="button"
+                  onClick={() => void deleteMessage(menuFor)}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm text-destructive hover:bg-accent/40"
+                >
+                  <Trash2 className="h-4 w-4" /> Delete for everyone
+                </button>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+
+        {forwardFor ? (
+          <div
+            className="fixed inset-0 z-50 flex items-end justify-center bg-background/70 backdrop-blur-sm"
+            onClick={() => setForwardFor(null)}
+          >
+            <div
+              className="glass-plate max-h-[70vh] w-full max-w-2xl space-y-2 overflow-y-auto rounded-t-2xl p-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <p className="mb-2 text-[0.65rem] tracking-widest text-muted-foreground uppercase">
+                Send to
+              </p>
+              {conversations
+                .filter((c) => c.id !== conversation.id)
+                .map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => void forwardMessage(forwardFor, c.id)}
+                    className="flex w-full items-center gap-3 rounded-lg border border-border bg-card/60 px-3 py-2 text-left text-sm hover:bg-accent/40"
+                  >
+                    <div className="rose-metal flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold">
+                      {(c.title ?? "W").slice(0, 1).toUpperCase()}
+                    </div>
+                    <span className="truncate">{c.title ?? "Wanda chat"}</span>
+                  </button>
+                ))}
+              {conversations.filter((c) => c.id !== conversation.id).length === 0 ? (
+                <p className="text-xs text-muted-foreground">No other chats yet.</p>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+
+        {shareText ? (
+          <ShareSheet target={{ text: shareText }} onClose={() => setShareText(null)} />
+        ) : null}
+
 
         <form onSubmit={sendText} className="glass-plate flex items-end gap-1 px-2 py-2">
           <input
