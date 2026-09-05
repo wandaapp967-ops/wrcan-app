@@ -5,18 +5,25 @@ import { toast } from "sonner";
 import {
   ArrowLeft,
   Camera,
+  Check,
+  Copy,
+  Forward,
   MapPin,
   Mic,
   Paperclip,
   Plus,
   Search,
   Send,
+  Share2,
   Square,
+  Trash2,
   Video,
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { Plate, inputClass } from "@/components/EmpireUI";
+import { ShareSheet } from "@/components/ShareSheet";
 import { MessageBubbleBody } from "@/components/ChatMedia";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import type { Database, Tables } from "@/integrations/supabase/types";
@@ -111,11 +118,13 @@ function ChatPage() {
     return (
       <ChatThread
         conversation={active}
+        conversations={conversations}
         onBack={() => setActiveId(null)}
         senderName={profile?.full_name || user?.email || "Member"}
       />
     );
   }
+
 
   return (
     <Shell title="Chat" subtitle="Real-time · Media · Location">
@@ -166,6 +175,9 @@ function NewChat({ onCreated }: { onCreated: (id: string) => void }) {
   const { user, profile } = useAuth();
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
+  const [group, setGroup] = useState(false);
+  const [groupTitle, setGroupTitle] = useState("");
+  const [picked, setPicked] = useState<Record<string, string>>({});
 
   const { data: people = [] } = useQuery({
     queryKey: ["chat-people", q],
@@ -198,8 +210,76 @@ function NewChat({ onCreated }: { onCreated: (id: string) => void }) {
     onCreated(data as string);
   };
 
+  const createGroup = async () => {
+    if (!user) return;
+    const title = groupTitle.trim();
+    const ids = Object.keys(picked);
+    if (title.length < 2) {
+      toast.error("Give the group a name.");
+      return;
+    }
+    if (ids.length === 0) {
+      toast.error("Add at least one member.");
+      return;
+    }
+    setBusy(true);
+    const { data: conv, error } = await supabase
+      .from("conversations")
+      .insert({ title, is_group: true, created_by: user.id })
+      .select("id")
+      .single();
+    if (error || !conv) {
+      setBusy(false);
+      toast.error(error?.message ?? "Could not create the group");
+      return;
+    }
+    const rows = [user.id, ...ids].map((id) => ({ conversation_id: conv.id, user_id: id }));
+    const { error: pErr } = await supabase.from("conversation_participants").insert(rows);
+    setBusy(false);
+    if (pErr) {
+      toast.error(pErr.message);
+      return;
+    }
+    toast.success("Group created");
+    setGroupTitle("");
+    setPicked({});
+    setGroup(false);
+    onCreated(conv.id);
+  };
+
   return (
     <Plate className="space-y-3">
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => setGroup(false)}
+          className={`rounded-full px-4 py-2 text-[0.65rem] tracking-widest uppercase ${
+            group ? "border border-border text-muted-foreground" : "rose-metal"
+          }`}
+        >
+          Direct chat
+        </button>
+        <button
+          type="button"
+          onClick={() => setGroup(true)}
+          className={`rounded-full px-4 py-2 text-[0.65rem] tracking-widest uppercase ${
+            group ? "rose-metal" : "border border-border text-muted-foreground"
+          }`}
+        >
+          New group
+        </button>
+      </div>
+
+      {group ? (
+        <input
+          className={inputClass}
+          placeholder="Group name e.g. Dobsonville Caterers"
+          value={groupTitle}
+          maxLength={80}
+          onChange={(e) => setGroupTitle(e.target.value)}
+        />
+      ) : null}
+
       <div className="flex items-center gap-2">
         <Search className="h-4 w-4 text-muted-foreground" />
         <input
@@ -210,40 +290,73 @@ function NewChat({ onCreated }: { onCreated: (id: string) => void }) {
         />
       </div>
       <div className="space-y-2">
-        {people.map((p) => (
-          <button
-            key={p.id}
-            type="button"
-            disabled={busy}
-            onClick={() => void start(p.id, p.full_name || "Member")}
-            className="flex w-full items-center gap-3 rounded-lg border border-border bg-card/60 px-3 py-2 text-left hover:bg-accent/40 disabled:opacity-50"
-          >
-            <div className="rose-metal flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold">
-              {(p.full_name || "M").slice(0, 1).toUpperCase()}
-            </div>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm">{p.full_name || "Member"}</span>
-              <span className="block text-[0.65rem] tracking-widest text-muted-foreground uppercase">
-                {p.member_type}
-                {p.city ? ` · ${p.city}` : ""}
+        {people.map((p) => {
+          const selected = !!picked[p.id];
+          return (
+            <button
+              key={p.id}
+              type="button"
+              disabled={busy}
+              onClick={() => {
+                if (!group) {
+                  void start(p.id, p.full_name || "Member");
+                  return;
+                }
+                setPicked((prev) => {
+                  const next = { ...prev };
+                  if (next[p.id]) delete next[p.id];
+                  else next[p.id] = p.full_name || "Member";
+                  return next;
+                });
+              }}
+              className={`flex w-full items-center gap-3 rounded-lg border px-3 py-2 text-left disabled:opacity-50 ${
+                selected
+                  ? "border-primary bg-accent/40"
+                  : "border-border bg-card/60 hover:bg-accent/40"
+              }`}
+            >
+              <div className="rose-metal flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold">
+                {(p.full_name || "M").slice(0, 1).toUpperCase()}
+              </div>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm">{p.full_name || "Member"}</span>
+                <span className="block text-[0.65rem] tracking-widest text-muted-foreground uppercase">
+                  {p.member_type}
+                  {p.city ? ` · ${p.city}` : ""}
+                </span>
               </span>
-            </span>
-          </button>
-        ))}
+              {group && selected ? <Check className="h-4 w-4 text-primary" /> : null}
+            </button>
+          );
+        })}
         {people.length === 0 ? (
           <p className="text-xs text-muted-foreground">No members found.</p>
         ) : null}
       </div>
+
+      {group ? (
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => void createGroup()}
+          className="rose-metal w-full rounded-full px-6 py-3 text-xs font-semibold tracking-widest uppercase disabled:opacity-50"
+        >
+          Create group ({Object.keys(picked).length})
+        </button>
+      ) : null}
     </Plate>
   );
 }
 
+
 function ChatThread({
   conversation,
+  conversations,
   onBack,
   senderName,
 }: {
   conversation: Conversation;
+  conversations: Conversation[];
   onBack: () => void;
   senderName: string;
 }) {
@@ -252,12 +365,16 @@ function ChatThread({
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [recording, setRecording] = useState(false);
+  const [menuFor, setMenuFor] = useState<Message | null>(null);
+  const [forwardFor, setForwardFor] = useState<Message | null>(null);
+  const [shareText, setShareText] = useState<string | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const startedAtRef = useRef(0);
   const endRef = useRef<HTMLDivElement | null>(null);
   const imageRef = useRef<HTMLInputElement | null>(null);
   const videoRef = useRef<HTMLInputElement | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
+
 
   const key = useMemo(() => ["messages", conversation.id], [conversation.id]);
 
@@ -294,11 +411,27 @@ function ChatThread({
           );
         },
       )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "messages",
+          filter: `conversation_id=eq.${conversation.id}`,
+        },
+        (payload) => {
+          const updated = payload.new as Message;
+          qc.setQueryData<Message[]>(key, (prev = []) =>
+            prev.map((m) => (m.id === updated.id ? updated : m)),
+          );
+        },
+      )
       .subscribe();
     return () => {
       void supabase.removeChannel(channel);
     };
   }, [conversation.id, key, qc]);
+
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -402,6 +535,59 @@ function ChatThread({
     }
   };
 
+  const textOf = (m: Message) =>
+    m.body ??
+    (m.kind === "location" ? `https://maps.google.com/?q=${m.latitude},${m.longitude}` : m.kind);
+
+  const copyMessage = async (m: Message) => {
+    try {
+      await navigator.clipboard.writeText(textOf(m));
+      toast.success("Copied to clipboard");
+    } catch {
+      toast.error("Could not copy.");
+    }
+    setMenuFor(null);
+  };
+
+  const deleteMessage = async (m: Message) => {
+    const { error } = await supabase
+      .from("messages")
+      .update({ deleted_at: new Date().toISOString(), body: null, media_path: null })
+      .eq("id", m.id);
+    setMenuFor(null);
+    if (error) toast.error(error.message);
+    else {
+      qc.setQueryData<Message[]>(key, (prev = []) => prev.filter((x) => x.id !== m.id));
+      toast.success("Message deleted for everyone");
+    }
+  };
+
+  const forwardMessage = async (m: Message, targetId: string) => {
+    if (!user) return;
+    const { error } = await supabase.from("messages").insert({
+      conversation_id: targetId,
+      sender_id: user.id,
+      kind: m.kind,
+      body: m.body,
+      media_path: m.media_path,
+      media_mime: m.media_mime,
+      media_size: m.media_size,
+      duration_ms: m.duration_ms,
+      latitude: m.latitude,
+      longitude: m.longitude,
+    });
+    setForwardFor(null);
+    if (error) toast.error(error.message);
+    else {
+      await supabase
+        .from("conversations")
+        .update({ last_message_at: new Date().toISOString() })
+        .eq("id", targetId);
+      toast.success("Message sent on");
+    }
+  };
+
+
   return (
     <Shell bare>
       <div className="flex h-screen flex-col">
@@ -421,27 +607,119 @@ function ChatThread({
         </header>
 
         <div className="flex-1 space-y-2 overflow-y-auto px-3 py-4">
-          {messages.map((m) => {
-            const mine = m.sender_id === user?.id;
-            return (
-              <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                <div
-                  className={`max-w-[80%] rounded-2xl px-3 py-2 shadow-sm ${
-                    mine
-                      ? "rounded-br-sm bg-primary text-primary-foreground"
-                      : "rounded-bl-sm bg-card text-card-foreground"
-                  }`}
-                >
-                  <MessageBubbleBody message={m} />
-                  <span className="mt-1 block text-right text-[0.6rem] opacity-70">
-                    {timeOf(m.created_at)}
-                  </span>
+          {messages
+            .filter((m) => !m.deleted_at)
+            .map((m) => {
+              const mine = m.sender_id === user?.id;
+              return (
+                <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+                  <button
+                    type="button"
+                    onClick={() => setMenuFor(m)}
+                    className={`max-w-[80%] rounded-2xl px-3 py-2 text-left shadow-sm ${
+                      mine
+                        ? "rounded-br-sm bg-primary text-primary-foreground"
+                        : "rounded-bl-sm bg-card text-card-foreground"
+                    }`}
+                  >
+                    <MessageBubbleBody message={m} />
+                    <span className="mt-1 block text-right text-[0.6rem] opacity-70">
+                      {timeOf(m.created_at)}
+                    </span>
+                  </button>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
           <div ref={endRef} />
         </div>
+
+        {menuFor ? (
+          <div
+            className="fixed inset-0 z-50 flex items-end justify-center bg-background/70 backdrop-blur-sm"
+            onClick={() => setMenuFor(null)}
+          >
+            <div
+              className="glass-plate w-full max-w-2xl space-y-2 rounded-t-2xl p-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={() => void copyMessage(menuFor)}
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm hover:bg-accent/40"
+              >
+                <Copy className="h-4 w-4 text-primary" /> Copy
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setForwardFor(menuFor);
+                  setMenuFor(null);
+                }}
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm hover:bg-accent/40"
+              >
+                <Forward className="h-4 w-4 text-primary" /> Forward / move to another chat
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShareText(textOf(menuFor));
+                  setMenuFor(null);
+                }}
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm hover:bg-accent/40"
+              >
+                <Share2 className="h-4 w-4 text-primary" /> Share to social networks
+              </button>
+              {menuFor.sender_id === user?.id ? (
+                <button
+                  type="button"
+                  onClick={() => void deleteMessage(menuFor)}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm text-destructive hover:bg-accent/40"
+                >
+                  <Trash2 className="h-4 w-4" /> Delete for everyone
+                </button>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+
+        {forwardFor ? (
+          <div
+            className="fixed inset-0 z-50 flex items-end justify-center bg-background/70 backdrop-blur-sm"
+            onClick={() => setForwardFor(null)}
+          >
+            <div
+              className="glass-plate max-h-[70vh] w-full max-w-2xl space-y-2 overflow-y-auto rounded-t-2xl p-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <p className="mb-2 text-[0.65rem] tracking-widest text-muted-foreground uppercase">
+                Send to
+              </p>
+              {conversations
+                .filter((c) => c.id !== conversation.id)
+                .map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => void forwardMessage(forwardFor, c.id)}
+                    className="flex w-full items-center gap-3 rounded-lg border border-border bg-card/60 px-3 py-2 text-left text-sm hover:bg-accent/40"
+                  >
+                    <div className="rose-metal flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold">
+                      {(c.title ?? "W").slice(0, 1).toUpperCase()}
+                    </div>
+                    <span className="truncate">{c.title ?? "Wanda chat"}</span>
+                  </button>
+                ))}
+              {conversations.filter((c) => c.id !== conversation.id).length === 0 ? (
+                <p className="text-xs text-muted-foreground">No other chats yet.</p>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+
+        {shareText ? (
+          <ShareSheet target={{ text: shareText }} onClose={() => setShareText(null)} />
+        ) : null}
+
 
         <form onSubmit={sendText} className="glass-plate flex items-end gap-1 px-2 py-2">
           <input

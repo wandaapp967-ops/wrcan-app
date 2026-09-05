@@ -2,11 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Award,
   Briefcase,
+  CircleDot,
+  Film,
   GraduationCap,
   MessageCircle,
   UserRound,
   Users,
 } from "lucide-react";
+
 import { Medallion } from "@/components/Medallion";
 import { Shell } from "@/components/Shell";
 import { RoseButton } from "@/components/EmpireUI";
@@ -37,11 +40,14 @@ export const Route = createFileRoute("/")({
 const TILES = [
   { to: "/training", label: "Training", icon: GraduationCap, caption: "YES · SETA · UNICEF" },
   { to: "/jobs", label: "Jobs", icon: Briefcase, caption: "Auto-matched" },
+  { to: "/reels", label: "Talent Reels", icon: Film, caption: "Show your skills" },
+  { to: "/status", label: "Status", icon: CircleDot, caption: "24-hour updates" },
   { to: "/certificates", label: "Certificates", icon: Award, caption: "Download" },
-  { to: "/chat", label: "Chat", icon: MessageCircle, caption: "Real time" },
+  { to: "/chat", label: "Chat", icon: MessageCircle, caption: "Groups & direct" },
   { to: "/profile", label: "My Profile", icon: UserRound, caption: "Registration" },
   { to: "/jobs", label: "Recruiters", icon: Users, caption: "Post vacancies" },
 ];
+
 
 function Index() {
   const { user, profile, loading } = useAuth();
