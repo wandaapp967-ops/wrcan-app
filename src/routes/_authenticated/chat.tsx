@@ -118,11 +118,13 @@ function ChatPage() {
     return (
       <ChatThread
         conversation={active}
+        conversations={conversations}
         onBack={() => setActiveId(null)}
         senderName={profile?.full_name || user?.email || "Member"}
       />
     );
   }
+
 
   return (
     <Shell title="Chat" subtitle="Real-time · Media · Location">
