@@ -351,10 +351,12 @@ function NewChat({ onCreated }: { onCreated: (id: string) => void }) {
 
 function ChatThread({
   conversation,
+  conversations,
   onBack,
   senderName,
 }: {
   conversation: Conversation;
+  conversations: Conversation[];
   onBack: () => void;
   senderName: string;
 }) {
@@ -363,12 +365,16 @@ function ChatThread({
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [recording, setRecording] = useState(false);
+  const [menuFor, setMenuFor] = useState<Message | null>(null);
+  const [forwardFor, setForwardFor] = useState<Message | null>(null);
+  const [shareText, setShareText] = useState<string | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const startedAtRef = useRef(0);
   const endRef = useRef<HTMLDivElement | null>(null);
   const imageRef = useRef<HTMLInputElement | null>(null);
   const videoRef = useRef<HTMLInputElement | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
+
 
   const key = useMemo(() => ["messages", conversation.id], [conversation.id]);
 
