@@ -2,11 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Award,
   Briefcase,
+  CircleDot,
+  Film,
   GraduationCap,
   MessageCircle,
   UserRound,
   Users,
 } from "lucide-react";
+
 import { Medallion } from "@/components/Medallion";
 import { Shell } from "@/components/Shell";
 import { RoseButton } from "@/components/EmpireUI";
