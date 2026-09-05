@@ -535,6 +535,59 @@ function ChatThread({
     }
   };
 
+  const textOf = (m: Message) =>
+    m.body ??
+    (m.kind === "location" ? `https://maps.google.com/?q=${m.latitude},${m.longitude}` : m.kind);
+
+  const copyMessage = async (m: Message) => {
+    try {
+      await navigator.clipboard.writeText(textOf(m));
+      toast.success("Copied to clipboard");
+    } catch {
+      toast.error("Could not copy.");
+    }
+    setMenuFor(null);
+  };
+
+  const deleteMessage = async (m: Message) => {
+    const { error } = await supabase
+      .from("messages")
+      .update({ deleted_at: new Date().toISOString(), body: null, media_path: null })
+      .eq("id", m.id);
+    setMenuFor(null);
+    if (error) toast.error(error.message);
+    else {
+      qc.setQueryData<Message[]>(key, (prev = []) => prev.filter((x) => x.id !== m.id));
+      toast.success("Message deleted for everyone");
+    }
+  };
+
+  const forwardMessage = async (m: Message, targetId: string) => {
+    if (!user) return;
+    const { error } = await supabase.from("messages").insert({
+      conversation_id: targetId,
+      sender_id: user.id,
+      kind: m.kind,
+      body: m.body,
+      media_path: m.media_path,
+      media_mime: m.media_mime,
+      media_size: m.media_size,
+      duration_ms: m.duration_ms,
+      latitude: m.latitude,
+      longitude: m.longitude,
+    });
+    setForwardFor(null);
+    if (error) toast.error(error.message);
+    else {
+      await supabase
+        .from("conversations")
+        .update({ last_message_at: new Date().toISOString() })
+        .eq("id", targetId);
+      toast.success("Message sent on");
+    }
+  };
+
+
   return (
     <Shell bare>
       <div className="flex h-screen flex-col">
