@@ -166,6 +166,9 @@ function NewChat({ onCreated }: { onCreated: (id: string) => void }) {
   const { user, profile } = useAuth();
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
+  const [group, setGroup] = useState(false);
+  const [groupTitle, setGroupTitle] = useState("");
+  const [picked, setPicked] = useState<Record<string, string>>({});
 
   const { data: people = [] } = useQuery({
     queryKey: ["chat-people", q],
@@ -198,8 +201,76 @@ function NewChat({ onCreated }: { onCreated: (id: string) => void }) {
     onCreated(data as string);
   };
 
+  const createGroup = async () => {
+    if (!user) return;
+    const title = groupTitle.trim();
+    const ids = Object.keys(picked);
+    if (title.length < 2) {
+      toast.error("Give the group a name.");
+      return;
+    }
+    if (ids.length === 0) {
+      toast.error("Add at least one member.");
+      return;
+    }
+    setBusy(true);
+    const { data: conv, error } = await supabase
+      .from("conversations")
+      .insert({ title, is_group: true, created_by: user.id })
+      .select("id")
+      .single();
+    if (error || !conv) {
+      setBusy(false);
+      toast.error(error?.message ?? "Could not create the group");
+      return;
+    }
+    const rows = [user.id, ...ids].map((id) => ({ conversation_id: conv.id, user_id: id }));
+    const { error: pErr } = await supabase.from("conversation_participants").insert(rows);
+    setBusy(false);
+    if (pErr) {
+      toast.error(pErr.message);
+      return;
+    }
+    toast.success("Group created");
+    setGroupTitle("");
+    setPicked({});
+    setGroup(false);
+    onCreated(conv.id);
+  };
+
   return (
     <Plate className="space-y-3">
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => setGroup(false)}
+          className={`rounded-full px-4 py-2 text-[0.65rem] tracking-widest uppercase ${
+            group ? "border border-border text-muted-foreground" : "rose-metal"
+          }`}
+        >
+          Direct chat
+        </button>
+        <button
+          type="button"
+          onClick={() => setGroup(true)}
+          className={`rounded-full px-4 py-2 text-[0.65rem] tracking-widest uppercase ${
+            group ? "rose-metal" : "border border-border text-muted-foreground"
+          }`}
+        >
+          New group
+        </button>
+      </div>
+
+      {group ? (
+        <input
+          className={inputClass}
+          placeholder="Group name e.g. Dobsonville Caterers"
+          value={groupTitle}
+          maxLength={80}
+          onChange={(e) => setGroupTitle(e.target.value)}
+        />
+      ) : null}
+
       <div className="flex items-center gap-2">
         <Search className="h-4 w-4 text-muted-foreground" />
         <input
@@ -210,33 +281,64 @@ function NewChat({ onCreated }: { onCreated: (id: string) => void }) {
         />
       </div>
       <div className="space-y-2">
-        {people.map((p) => (
-          <button
-            key={p.id}
-            type="button"
-            disabled={busy}
-            onClick={() => void start(p.id, p.full_name || "Member")}
-            className="flex w-full items-center gap-3 rounded-lg border border-border bg-card/60 px-3 py-2 text-left hover:bg-accent/40 disabled:opacity-50"
-          >
-            <div className="rose-metal flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold">
-              {(p.full_name || "M").slice(0, 1).toUpperCase()}
-            </div>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm">{p.full_name || "Member"}</span>
-              <span className="block text-[0.65rem] tracking-widest text-muted-foreground uppercase">
-                {p.member_type}
-                {p.city ? ` · ${p.city}` : ""}
+        {people.map((p) => {
+          const selected = !!picked[p.id];
+          return (
+            <button
+              key={p.id}
+              type="button"
+              disabled={busy}
+              onClick={() => {
+                if (!group) {
+                  void start(p.id, p.full_name || "Member");
+                  return;
+                }
+                setPicked((prev) => {
+                  const next = { ...prev };
+                  if (next[p.id]) delete next[p.id];
+                  else next[p.id] = p.full_name || "Member";
+                  return next;
+                });
+              }}
+              className={`flex w-full items-center gap-3 rounded-lg border px-3 py-2 text-left disabled:opacity-50 ${
+                selected
+                  ? "border-primary bg-accent/40"
+                  : "border-border bg-card/60 hover:bg-accent/40"
+              }`}
+            >
+              <div className="rose-metal flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold">
+                {(p.full_name || "M").slice(0, 1).toUpperCase()}
+              </div>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm">{p.full_name || "Member"}</span>
+                <span className="block text-[0.65rem] tracking-widest text-muted-foreground uppercase">
+                  {p.member_type}
+                  {p.city ? ` · ${p.city}` : ""}
+                </span>
               </span>
-            </span>
-          </button>
-        ))}
+              {group && selected ? <Check className="h-4 w-4 text-primary" /> : null}
+            </button>
+          );
+        })}
         {people.length === 0 ? (
           <p className="text-xs text-muted-foreground">No members found.</p>
         ) : null}
       </div>
+
+      {group ? (
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => void createGroup()}
+          className="rose-metal w-full rounded-full px-6 py-3 text-xs font-semibold tracking-widest uppercase disabled:opacity-50"
+        >
+          Create group ({Object.keys(picked).length})
+        </button>
+      ) : null}
     </Plate>
   );
 }
+
 
 function ChatThread({
   conversation,
