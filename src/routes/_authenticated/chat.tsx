@@ -5,18 +5,25 @@ import { toast } from "sonner";
 import {
   ArrowLeft,
   Camera,
+  Check,
+  Copy,
+  Forward,
   MapPin,
   Mic,
   Paperclip,
   Plus,
   Search,
   Send,
+  Share2,
   Square,
+  Trash2,
   Video,
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { Plate, inputClass } from "@/components/EmpireUI";
+import { ShareSheet } from "@/components/ShareSheet";
 import { MessageBubbleBody } from "@/components/ChatMedia";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import type { Database, Tables } from "@/integrations/supabase/types";
