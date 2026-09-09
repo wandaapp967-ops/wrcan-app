@@ -316,9 +316,7 @@ function NewChat({ onCreated }: { onCreated: (id: string) => void }) {
                   : "border-border bg-card/60 hover:bg-accent/40"
               }`}
             >
-              <div className="rose-metal flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold">
-                {(p.full_name || "M").slice(0, 1).toUpperCase()}
-              </div>
+              <UserAvatar userId={p.id} name={p.full_name} size={36} />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm">{p.full_name || "Member"}</span>
                 <span className="block text-[0.65rem] tracking-widest text-muted-foreground uppercase">
