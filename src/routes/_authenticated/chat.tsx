@@ -611,7 +611,11 @@ function ChatThread({
             .map((m) => {
               const mine = m.sender_id === user?.id;
               return (
-                <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+                <div
+                  key={m.id}
+                  className={`flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}
+                >
+                  {!mine ? <UserAvatar userId={m.sender_id} size={28} /> : null}
                   <button
                     type="button"
                     onClick={() => setMenuFor(m)}
