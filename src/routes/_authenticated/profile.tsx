@@ -1,11 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Camera } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Shell } from "@/components/Shell";
+import { Avatar } from "@/components/Avatar";
 import { Field, Plate, RoseButton, areaClass, inputClass } from "@/components/EmpireUI";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { compressImage } from "@/lib/media";
 import type { Database } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/_authenticated/profile")({
