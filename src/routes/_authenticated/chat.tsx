@@ -23,6 +23,7 @@ import { Shell } from "@/components/Shell";
 import { Plate, inputClass } from "@/components/EmpireUI";
 import { ShareSheet } from "@/components/ShareSheet";
 import { MessageBubbleBody } from "@/components/ChatMedia";
+import { UserAvatar } from "@/components/Avatar";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
