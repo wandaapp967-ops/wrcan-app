@@ -89,6 +89,55 @@ function ProfilePage() {
   const { user, profile, refreshProfile, signOut } = useAuth();
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const photoRef = useRef<HTMLInputElement | null>(null);
+
+  const uploadPhoto = async (file: File) => {
+    if (!user) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose a photo.");
+      return;
+    }
+    setUploadingPhoto(true);
+    try {
+      const small = await compressImage(file, 512, 0.8);
+      const path = `${user.id}/avatar-${Date.now()}.jpg`;
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, small, { contentType: small.type || "image/jpeg", upsert: true });
+      if (upErr) throw upErr;
+      const previous = profile?.avatar_url ?? null;
+      const { error } = await supabase
+        .from("profiles")
+        .update({ avatar_url: path, updated_at: new Date().toISOString() })
+        .eq("id", user.id);
+      if (error) throw error;
+      if (previous && previous !== path) {
+        await supabase.storage.from("avatars").remove([previous]);
+      }
+      await refreshProfile();
+      toast.success("Profile picture updated.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const removePhoto = async () => {
+    if (!user || !profile?.avatar_url) return;
+    setUploadingPhoto(true);
+    await supabase.storage.from("avatars").remove([profile.avatar_url]);
+    const { error } = await supabase.from("profiles").update({ avatar_url: null }).eq("id", user.id);
+    setUploadingPhoto(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    await refreshProfile();
+    toast.success("Profile picture removed.");
+  };
+
 
   const [form, setForm] = useState({
     full_name: "",
