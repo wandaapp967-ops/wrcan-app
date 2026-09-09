@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Camera, Loader2, Trash2, Video } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { Plate, RoseButton, areaClass } from "@/components/EmpireUI";
+import { UserAvatar } from "@/components/Avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { compressImage, signedUrl } from "@/lib/media";
@@ -212,9 +213,7 @@ function StatusPage() {
         {posts.map((p) => (
           <Plate key={p.id} className="space-y-2">
             <div className="flex items-center gap-2">
-              <div className="rose-metal flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold">
-                {(names[p.user_id] ?? "M").slice(0, 1).toUpperCase()}
-              </div>
+              <UserAvatar userId={p.user_id} name={names[p.user_id] ?? null} size={36} />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold">{names[p.user_id] ?? "Member"}</p>
                 <p className="text-[0.65rem] tracking-widest text-muted-foreground uppercase">

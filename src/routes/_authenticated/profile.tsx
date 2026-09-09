@@ -1,11 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Camera } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Shell } from "@/components/Shell";
+import { Avatar } from "@/components/Avatar";
 import { Field, Plate, RoseButton, areaClass, inputClass } from "@/components/EmpireUI";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { compressImage } from "@/lib/media";
 import type { Database } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/_authenticated/profile")({
@@ -86,6 +89,55 @@ function ProfilePage() {
   const { user, profile, refreshProfile, signOut } = useAuth();
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const photoRef = useRef<HTMLInputElement | null>(null);
+
+  const uploadPhoto = async (file: File) => {
+    if (!user) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose a photo.");
+      return;
+    }
+    setUploadingPhoto(true);
+    try {
+      const small = await compressImage(file, 512, 0.8);
+      const path = `${user.id}/avatar-${Date.now()}.jpg`;
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, small, { contentType: small.type || "image/jpeg", upsert: true });
+      if (upErr) throw upErr;
+      const previous = profile?.avatar_url ?? null;
+      const { error } = await supabase
+        .from("profiles")
+        .update({ avatar_url: path, updated_at: new Date().toISOString() })
+        .eq("id", user.id);
+      if (error) throw error;
+      if (previous && previous !== path) {
+        await supabase.storage.from("avatars").remove([previous]);
+      }
+      await refreshProfile();
+      toast.success("Profile picture updated.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const removePhoto = async () => {
+    if (!user || !profile?.avatar_url) return;
+    setUploadingPhoto(true);
+    await supabase.storage.from("avatars").remove([profile.avatar_url]);
+    const { error } = await supabase.from("profiles").update({ avatar_url: null }).eq("id", user.id);
+    setUploadingPhoto(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    await refreshProfile();
+    toast.success("Profile picture removed.");
+  };
+
 
   const [form, setForm] = useState({
     full_name: "",
@@ -192,6 +244,57 @@ function ProfilePage() {
   return (
     <Shell title="Registration Portal" subtitle="Your WRCAN dossier">
       <form onSubmit={save} className="space-y-5 pb-6">
+        <Plate className="flex items-center gap-4">
+          <input
+            ref={photoRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) void uploadPhoto(f);
+              e.target.value = "";
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => photoRef.current?.click()}
+            className="relative rounded-full"
+            aria-label="Change profile picture"
+          >
+            <Avatar path={profile?.avatar_url ?? null} name={form.full_name} size={76} />
+            <span className="absolute -right-1 -bottom-1 rose-metal flex h-7 w-7 items-center justify-center rounded-full">
+              <Camera className="h-3.5 w-3.5" />
+            </span>
+          </button>
+          <div className="min-w-0 flex-1">
+            <h2 className="font-display text-lg font-semibold">Profile picture</h2>
+            <p className="text-[0.65rem] tracking-widest text-muted-foreground uppercase">
+              Shown in chat, your area group and talent reels
+            </p>
+            <div className="mt-2 flex gap-2">
+              <button
+                type="button"
+                disabled={uploadingPhoto}
+                onClick={() => photoRef.current?.click()}
+                className="rounded-full border border-primary/60 px-4 py-1.5 text-[0.65rem] tracking-widest text-primary uppercase disabled:opacity-50"
+              >
+                {uploadingPhoto ? "Uploading…" : profile?.avatar_url ? "Change" : "Upload"}
+              </button>
+              {profile?.avatar_url ? (
+                <button
+                  type="button"
+                  disabled={uploadingPhoto}
+                  onClick={() => void removePhoto()}
+                  className="rounded-full border border-border px-4 py-1.5 text-[0.65rem] tracking-widest text-muted-foreground uppercase disabled:opacity-50"
+                >
+                  Remove
+                </button>
+              ) : null}
+            </div>
+          </div>
+        </Plate>
+
         <Plate>
           <h2 className="font-display mb-3 text-lg font-semibold">Member type</h2>
           <div className="grid grid-cols-2 gap-3">

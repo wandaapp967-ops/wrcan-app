@@ -23,6 +23,7 @@ import { Shell } from "@/components/Shell";
 import { Plate, inputClass } from "@/components/EmpireUI";
 import { ShareSheet } from "@/components/ShareSheet";
 import { MessageBubbleBody } from "@/components/ChatMedia";
+import { UserAvatar } from "@/components/Avatar";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -315,9 +316,7 @@ function NewChat({ onCreated }: { onCreated: (id: string) => void }) {
                   : "border-border bg-card/60 hover:bg-accent/40"
               }`}
             >
-              <div className="rose-metal flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold">
-                {(p.full_name || "M").slice(0, 1).toUpperCase()}
-              </div>
+              <UserAvatar userId={p.id} name={p.full_name} size={36} />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm">{p.full_name || "Member"}</span>
                 <span className="block text-[0.65rem] tracking-widest text-muted-foreground uppercase">
@@ -612,7 +611,11 @@ function ChatThread({
             .map((m) => {
               const mine = m.sender_id === user?.id;
               return (
-                <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+                <div
+                  key={m.id}
+                  className={`flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}
+                >
+                  {!mine ? <UserAvatar userId={m.sender_id} size={28} /> : null}
                   <button
                     type="button"
                     onClick={() => setMenuFor(m)}

@@ -1017,6 +1017,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      impact_stats: { Args: never; Returns: Json }
       is_participant: {
         Args: { _conversation_id: string; _user_id: string }
         Returns: boolean
