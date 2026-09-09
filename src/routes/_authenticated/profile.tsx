@@ -244,6 +244,57 @@ function ProfilePage() {
   return (
     <Shell title="Registration Portal" subtitle="Your WRCAN dossier">
       <form onSubmit={save} className="space-y-5 pb-6">
+        <Plate className="flex items-center gap-4">
+          <input
+            ref={photoRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) void uploadPhoto(f);
+              e.target.value = "";
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => photoRef.current?.click()}
+            className="relative rounded-full"
+            aria-label="Change profile picture"
+          >
+            <Avatar path={profile?.avatar_url ?? null} name={form.full_name} size={76} />
+            <span className="absolute -right-1 -bottom-1 rose-metal flex h-7 w-7 items-center justify-center rounded-full">
+              <Camera className="h-3.5 w-3.5" />
+            </span>
+          </button>
+          <div className="min-w-0 flex-1">
+            <h2 className="font-display text-lg font-semibold">Profile picture</h2>
+            <p className="text-[0.65rem] tracking-widest text-muted-foreground uppercase">
+              Shown in chat, your area group and talent reels
+            </p>
+            <div className="mt-2 flex gap-2">
+              <button
+                type="button"
+                disabled={uploadingPhoto}
+                onClick={() => photoRef.current?.click()}
+                className="rounded-full border border-primary/60 px-4 py-1.5 text-[0.65rem] tracking-widest text-primary uppercase disabled:opacity-50"
+              >
+                {uploadingPhoto ? "Uploading…" : profile?.avatar_url ? "Change" : "Upload"}
+              </button>
+              {profile?.avatar_url ? (
+                <button
+                  type="button"
+                  disabled={uploadingPhoto}
+                  onClick={() => void removePhoto()}
+                  className="rounded-full border border-border px-4 py-1.5 text-[0.65rem] tracking-widest text-muted-foreground uppercase disabled:opacity-50"
+                >
+                  Remove
+                </button>
+              ) : null}
+            </div>
+          </div>
+        </Plate>
+
         <Plate>
           <h2 className="font-display mb-3 text-lg font-semibold">Member type</h2>
           <div className="grid grid-cols-2 gap-3">
