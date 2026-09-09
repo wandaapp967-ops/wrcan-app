@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Camera, Loader2, Trash2, Video } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { Plate, RoseButton, areaClass } from "@/components/EmpireUI";
+import { UserAvatar } from "@/components/Avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { compressImage, signedUrl } from "@/lib/media";
