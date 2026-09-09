@@ -299,6 +299,7 @@ function ReelCard({ reel }: { reel: Reel }) {
   return (
     <Plate className="space-y-2">
       <div className="flex items-start gap-2">
+        <UserAvatar userId={reel.user_id} size={36} />
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-sm font-semibold">{reel.title}</h2>
           <p className="text-[0.65rem] tracking-widest text-muted-foreground uppercase">
