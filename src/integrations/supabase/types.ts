@@ -167,9 +167,13 @@ export type Database = {
         Row: {
           area_key: string | null
           avatar_url: string | null
+          community_slug: string | null
           created_at: string
           created_by: string | null
+          description: string | null
           id: string
+          invite_url: string | null
+          is_community: boolean
           is_group: boolean
           last_message_at: string
           title: string | null
@@ -177,9 +181,13 @@ export type Database = {
         Insert: {
           area_key?: string | null
           avatar_url?: string | null
+          community_slug?: string | null
           created_at?: string
           created_by?: string | null
+          description?: string | null
           id?: string
+          invite_url?: string | null
+          is_community?: boolean
           is_group?: boolean
           last_message_at?: string
           title?: string | null
@@ -187,9 +195,13 @@ export type Database = {
         Update: {
           area_key?: string | null
           avatar_url?: string | null
+          community_slug?: string | null
           created_at?: string
           created_by?: string | null
+          description?: string | null
           id?: string
+          invite_url?: string | null
+          is_community?: boolean
           is_group?: boolean
           last_message_at?: string
           title?: string | null
@@ -1022,6 +1034,7 @@ export type Database = {
         Args: { _conversation_id: string; _user_id: string }
         Returns: boolean
       }
+      join_community: { Args: { _conversation_id: string }; Returns: string }
       start_direct_chat: {
         Args: { _other_id: string; _title?: string }
         Returns: string
