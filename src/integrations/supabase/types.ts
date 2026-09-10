@@ -1022,6 +1022,7 @@ export type Database = {
         Returns: string
       }
       auto_allocate_area: { Args: never; Returns: string }
+      control_room_stats: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
