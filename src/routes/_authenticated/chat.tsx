@@ -5,6 +5,9 @@ import { toast } from "sonner";
 import {
   ArrowLeft,
   Camera,
+  ExternalLink,
+  Users,
+
   Check,
   Copy,
   Forward,
