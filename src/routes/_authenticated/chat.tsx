@@ -167,7 +167,15 @@ function ChatPage() {
             </div>
           </Plate>
         ))}
+
+        <Communities
+          onOpen={(id) => {
+            setActiveId(id);
+            void qc.invalidateQueries({ queryKey: ["conversations", user?.id] });
+          }}
+        />
       </div>
+
     </Shell>
   );
 }
