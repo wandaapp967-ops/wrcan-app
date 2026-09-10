@@ -180,6 +180,101 @@ function ChatPage() {
   );
 }
 
+/** Official WRCAN community groups — every registered member can join and chat in real time. */
+function Communities({ onOpen }: { onOpen: (id: string) => void }) {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const { data: groups = [] } = useQuery({
+    queryKey: ["communities"],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("conversations")
+        .select("*")
+        .eq("is_community", true)
+        .order("title");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: joined = [] } = useQuery({
+    queryKey: ["community-memberships", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("conversation_participants")
+        .select("conversation_id")
+        .eq("user_id", user!.id);
+      if (error) throw error;
+      return data.map((r) => r.conversation_id);
+    },
+  });
+
+  const join = async (id: string) => {
+    setBusy(id);
+    const { error } = await supabase.rpc("join_community", { _conversation_id: id });
+    setBusy(null);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    await qc.invalidateQueries({ queryKey: ["community-memberships", user?.id] });
+    await qc.invalidateQueries({ queryKey: ["conversations", user?.id] });
+    toast.success("You joined the group.");
+    onOpen(id);
+  };
+
+  if (groups.length === 0) return null;
+
+  return (
+    <div className="space-y-3 pt-4">
+      <p className="text-[0.65rem] tracking-widest text-muted-foreground uppercase">
+        WRCAN community groups
+      </p>
+      {groups.map((g) => {
+        const isMember = joined.includes(g.id);
+        return (
+          <Plate key={g.id} className="space-y-2">
+            <div className="flex items-center gap-3">
+              <div className="rose-metal flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-semibold">
+                <Users className="h-5 w-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold">{g.title}</p>
+                <p className="line-clamp-2 text-[0.7rem] text-muted-foreground">{g.description}</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                disabled={busy === g.id}
+                onClick={() => (isMember ? onOpen(g.id) : void join(g.id))}
+                className="rose-metal rounded-full px-5 py-1.5 text-[0.65rem] font-semibold tracking-widest uppercase disabled:opacity-50"
+              >
+                {busy === g.id ? "Joining…" : isMember ? "Open chat" : "Join group"}
+              </button>
+              {g.invite_url ? (
+                <a
+                  href={g.invite_url}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="flex items-center gap-1 rounded-full border border-primary/60 px-5 py-1.5 text-[0.65rem] tracking-widest text-primary uppercase"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" /> WhatsApp group
+                </a>
+              ) : null}
+            </div>
+          </Plate>
+        );
+      })}
+    </div>
+  );
+}
+
+
 function NewChat({ onCreated }: { onCreated: (id: string) => void }) {
   const { user, profile } = useAuth();
   const [q, setQ] = useState("");
