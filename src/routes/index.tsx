@@ -46,6 +46,8 @@ const TILES = [
   { to: "/chat", label: "Chat", icon: MessageCircle, caption: "Groups & direct" },
   { to: "/profile", label: "My Profile", icon: UserRound, caption: "Registration" },
   { to: "/jobs", label: "Recruiters", icon: Users, caption: "Post vacancies" },
+  { to: "/control-room", label: "Control Room", icon: Activity, caption: "Live figures" },
+
 ];
 
 
