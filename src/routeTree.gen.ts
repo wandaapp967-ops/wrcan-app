@@ -18,6 +18,7 @@ import { Route as ReelsRouteImport } from './routes/reels'
 import { Route as TrainingRouteImport } from './routes/training'
 import { Route as AuthenticatedCertificatesRouteImport } from './routes/_authenticated/certificates'
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
+import { Route as AuthenticatedControlRoomRouteImport } from './routes/_authenticated/control-room'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedStatusRouteImport } from './routes/_authenticated/status'
 import { Route as JobsJobIdRouteImport } from './routes/jobs.$jobId'
@@ -68,6 +69,12 @@ const AuthenticatedChatRoute = AuthenticatedChatRouteImport.update({
   path: '/chat',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedControlRoomRoute =
+  AuthenticatedControlRoomRouteImport.update({
+    id: '/control-room',
+    path: '/control-room',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -98,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/training': typeof TrainingRouteWithChildren
   '/certificates': typeof AuthenticatedCertificatesRoute
   '/chat': typeof AuthenticatedChatRoute
+  '/control-room': typeof AuthenticatedControlRoomRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/status': typeof AuthenticatedStatusRoute
   '/jobs/$jobId': typeof JobsJobIdRoute
@@ -112,6 +120,7 @@ export interface FileRoutesByTo {
   '/training': typeof TrainingRouteWithChildren
   '/certificates': typeof AuthenticatedCertificatesRoute
   '/chat': typeof AuthenticatedChatRoute
+  '/control-room': typeof AuthenticatedControlRoomRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/status': typeof AuthenticatedStatusRoute
   '/jobs/$jobId': typeof JobsJobIdRoute
@@ -128,6 +137,7 @@ export interface FileRoutesById {
   '/training': typeof TrainingRouteWithChildren
   '/_authenticated/certificates': typeof AuthenticatedCertificatesRoute
   '/_authenticated/chat': typeof AuthenticatedChatRoute
+  '/_authenticated/control-room': typeof AuthenticatedControlRoomRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/status': typeof AuthenticatedStatusRoute
   '/jobs/$jobId': typeof JobsJobIdRoute
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/training'
     | '/certificates'
     | '/chat'
+    | '/control-room'
     | '/profile'
     | '/status'
     | '/jobs/$jobId'
@@ -158,6 +169,7 @@ export interface FileRouteTypes {
     | '/training'
     | '/certificates'
     | '/chat'
+    | '/control-room'
     | '/profile'
     | '/status'
     | '/jobs/$jobId'
@@ -173,6 +185,7 @@ export interface FileRouteTypes {
     | '/training'
     | '/_authenticated/certificates'
     | '/_authenticated/chat'
+    | '/_authenticated/control-room'
     | '/_authenticated/profile'
     | '/_authenticated/status'
     | '/jobs/$jobId'
@@ -254,6 +267,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedChatRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/control-room': {
+      id: '/_authenticated/control-room'
+      path: '/control-room'
+      fullPath: '/control-room'
+      preLoaderRoute: typeof AuthenticatedControlRoomRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
       path: '/profile'
@@ -288,6 +308,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCertificatesRoute: typeof AuthenticatedCertificatesRoute
   AuthenticatedChatRoute: typeof AuthenticatedChatRoute
+  AuthenticatedControlRoomRoute: typeof AuthenticatedControlRoomRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedStatusRoute: typeof AuthenticatedStatusRoute
 }
@@ -295,6 +316,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCertificatesRoute: AuthenticatedCertificatesRoute,
   AuthenticatedChatRoute: AuthenticatedChatRoute,
+  AuthenticatedControlRoomRoute: AuthenticatedControlRoomRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedStatusRoute: AuthenticatedStatusRoute,
 }
