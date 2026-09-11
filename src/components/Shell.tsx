@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { CircleDot, Film, Home, MessageCircle, User, Briefcase } from "lucide-react";
+import { Activity, CircleDot, Film, Home, MessageCircle, User, Briefcase } from "lucide-react";
 import type { ReactNode } from "react";
 import logoAsset from "@/assets/wanda-logo.png.asset.json";
 
@@ -9,8 +9,10 @@ const NAV = [
   { to: "/reels", label: "Reels", icon: Film },
   { to: "/status", label: "Status", icon: CircleDot },
   { to: "/chat", label: "Chat", icon: MessageCircle },
+  { to: "/control-room", label: "Control", icon: Activity },
   { to: "/profile", label: "Profile", icon: User },
 ];
+
 
 
 export function Shell({
