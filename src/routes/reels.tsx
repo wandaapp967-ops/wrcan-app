@@ -273,7 +273,7 @@ function ReelCard({ reel }: { reel: Reel }) {
       ([entry]) => {
         const v = videoRef.current;
         if (!v) return;
-        if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
+        if (entry && entry.isIntersecting && entry.intersectionRatio > 0.6) {
           void v.play().catch(() => undefined);
         } else {
           v.pause();
