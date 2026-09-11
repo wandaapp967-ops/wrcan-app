@@ -2,7 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Eye, Heart, Loader2, Upload } from "lucide-react";
+import { Eye, Heart, Loader2, Upload, Volume2, VolumeX } from "lucide-react";
+import logoAsset from "@/assets/wanda-logo.png.asset.json";
 import { Shell } from "@/components/Shell";
 import { Field, Plate, RoseButton, areaClass, inputClass } from "@/components/EmpireUI";
 import { UserAvatar } from "@/components/Avatar";
@@ -250,7 +251,11 @@ function ReelCard({ reel }: { reel: Reel }) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [url, setUrl] = useState<string | null>(null);
+  const [muted, setMuted] = useState(true);
+  const [outro, setOutro] = useState(false);
   const counted = useRef(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const frameRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let live = true;
@@ -259,6 +264,26 @@ function ReelCard({ reel }: { reel: Reel }) {
       live = false;
     };
   }, [reel.media_path]);
+
+  // TikTok-style autoplay: play while the reel is the one on screen, pause otherwise.
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        const v = videoRef.current;
+        if (!v) return;
+        if (entry && entry.isIntersecting && entry.intersectionRatio > 0.6) {
+          void v.play().catch(() => undefined);
+        } else {
+          v.pause();
+        }
+      },
+      { threshold: [0, 0.6, 1] },
+    );
+    io.observe(frame);
+    return () => io.disconnect();
+  }, [url]);
 
   const { data: likes = [] } = useQuery({
     queryKey: ["reel-likes", reel.id],
@@ -311,28 +336,80 @@ function ReelCard({ reel }: { reel: Reel }) {
         </span>
       </div>
 
-      {url ? (
-        reel.kind === "video" ? (
-          <video
-            src={url}
-            controls
-            playsInline
-            preload="metadata"
-            onPlay={countView}
-            className="w-full rounded-xl"
-          />
+      <div ref={frameRef} className="relative overflow-hidden rounded-xl">
+        {url ? (
+          reel.kind === "video" ? (
+            <video
+              ref={videoRef}
+              src={url}
+              playsInline
+              muted={muted}
+              loop={false}
+              preload="metadata"
+              onPlay={countView}
+              onEnded={() => {
+                setOutro(true);
+                window.setTimeout(() => {
+                  setOutro(false);
+                  const v = videoRef.current;
+                  if (v) {
+                    v.currentTime = 0;
+                    void v.play().catch(() => undefined);
+                  }
+                }, 2200);
+              }}
+              onClick={() => {
+                const v = videoRef.current;
+                if (!v) return;
+                if (v.paused) void v.play().catch(() => undefined);
+                else v.pause();
+              }}
+              className="w-full rounded-xl"
+            />
+          ) : (
+            <img
+              src={url}
+              alt={reel.title}
+              loading="lazy"
+              onLoad={countView}
+              className="w-full rounded-xl"
+            />
+          )
         ) : (
-          <img
-            src={url}
-            alt={reel.title}
-            loading="lazy"
-            onLoad={countView}
-            className="w-full rounded-xl"
-          />
-        )
-      ) : (
-        <div className="h-48 w-full animate-pulse rounded-xl bg-muted/40" />
-      )}
+          <div className="h-48 w-full animate-pulse rounded-xl bg-muted/40" />
+        )}
+
+        {/* Persistent brand watermark */}
+        <img
+          src={logoAsset.url}
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute top-2 right-2 h-9 w-9 rounded-full object-contain opacity-70"
+        />
+
+        {/* Wanda logo outro at the end of every reel */}
+        {outro ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-background/85 backdrop-blur-sm animate-fade-in">
+            <img src={logoAsset.url} alt="Wanda" className="h-24 w-24 object-contain" />
+            <p className="rose-text font-display text-lg tracking-empire">WANDA</p>
+          </div>
+        ) : null}
+
+        {reel.kind === "video" && url ? (
+          <button
+            type="button"
+            onClick={() => {
+              setMuted((m) => !m);
+              const v = videoRef.current;
+              if (v) void v.play().catch(() => undefined);
+            }}
+            aria-label={muted ? "Unmute reel" : "Mute reel"}
+            className="absolute bottom-2 right-2 rounded-full bg-background/70 p-2 text-foreground"
+          >
+            {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+          </button>
+        ) : null}
+      </div>
 
       {reel.caption ? <p className="text-sm">{reel.caption}</p> : null}
 
