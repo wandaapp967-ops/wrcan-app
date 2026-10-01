@@ -141,6 +141,7 @@ function RootComponent() {
           <BootScreen />
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
+          <InstallPrompt />
           <Toaster position="top-center" richColors />
         </PresenceProvider>
       </AuthProvider>
