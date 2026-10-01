@@ -7,6 +7,9 @@ import { MatchRing, Plate, inputClass } from "@/components/EmpireUI";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { matchJob, scoreBand } from "@/lib/matching";
+import { LiveJobsFeed } from "@/components/LiveJobsFeed";
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/jobs")({
   head: () => ({
@@ -49,6 +52,17 @@ function JobsPage() {
       return data;
     },
   });
+
+  const qc = useQueryClient();
+  useEffect(() => {
+    const ch = supabase
+      .channel("jobs-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "jobs" }, () => {
+        void qc.invalidateQueries({ queryKey: ["jobs"] });
+      })
+      .subscribe();
+    return () => void supabase.removeChannel(ch);
+  }, [qc]);
 
   const ranked = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -148,6 +162,9 @@ function JobsPage() {
             No vacancies match that search yet.
           </p>
         ) : null}
+
+        <div className="deco-rule my-4" />
+        <LiveJobsFeed term={q} />
       </div>
     </Shell>
   );
