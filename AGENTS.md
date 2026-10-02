@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep the media-studio practice local to the browser and embed shared live rooms through Jitsi; this allows immediate demo recordings without storing student video or operating a call server.

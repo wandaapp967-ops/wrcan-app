@@ -7,6 +7,7 @@ import {
   Film,
   GraduationCap,
   MessageCircle,
+  Radio,
   UserRound,
   Users,
 } from "lucide-react";
@@ -40,6 +41,7 @@ export const Route = createFileRoute("/")({
 
 const TILES = [
   { to: "/training", label: "Training", icon: GraduationCap, caption: "YES · SETA · UNICEF" },
+  { to: "/media-studio", label: "Media Studio", icon: Radio, caption: "Radio · video calls" },
   { to: "/jobs", label: "Jobs", icon: Briefcase, caption: "Auto-matched" },
   { to: "/reels", label: "Talent Reels", icon: Film, caption: "Show your skills" },
   { to: "/status", label: "Status", icon: CircleDot, caption: "24-hour updates" },
