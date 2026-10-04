@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Activity, CircleDot, Film, Home, MessageCircle, User, Briefcase } from "lucide-react";
 import type { ReactNode } from "react";
+import { useUnreadCount, useControlAccess } from "@/hooks/useBadges";
 import logoAsset from "@/assets/wanda-logo.png.asset.json";
 
 const NAV = [
@@ -27,6 +28,9 @@ export function Shell({
   bare?: boolean;
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const unread = useUnreadCount();
+  const { allowed: canControl } = useControlAccess();
+  const nav = NAV.filter((n) => n.to !== "/control-room" || canControl);
 
   return (
     <div className="gold-pattern relative min-h-screen">
@@ -58,7 +62,7 @@ export function Shell({
 
         {!bare && (
           <nav className="glass-plate fixed right-0 bottom-0 left-0 z-40 mx-auto flex w-full max-w-2xl items-center justify-around px-2 py-2">
-            {NAV.map(({ to, label, icon: Icon }) => {
+            {nav.map(({ to, label, icon: Icon }) => {
               const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
               return (
                 <Link
@@ -68,7 +72,14 @@ export function Shell({
                     active ? "text-primary" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  <Icon className="h-5 w-5" strokeWidth={active ? 2.2 : 1.6} />
+                  <span className="relative">
+                    <Icon className="h-5 w-5" strokeWidth={active ? 2.2 : 1.6} />
+                    {to === "/chat" && unread > 0 ? (
+                      <span className="balloon-red absolute -top-2 -right-3 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[0.55rem] font-bold">
+                        {unread > 99 ? "99+" : unread}
+                      </span>
+                    ) : null}
+                  </span>
                   <span className="text-[0.6rem] tracking-widest uppercase">{label}</span>
                 </Link>
               );

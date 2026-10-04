@@ -14,6 +14,8 @@ import {
 import { Shell } from "@/components/Shell";
 import { Plate } from "@/components/EmpireUI";
 import { supabase } from "@/integrations/supabase/client";
+import { useControlAccess } from "@/hooks/useBadges";
+import { Lock } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/control-room")({
   head: () => ({
@@ -105,12 +107,27 @@ function Stat({
 }
 
 function ControlRoomPage() {
+  const { allowed, loading } = useControlAccess();
+  if (loading) return <Shell title="Control Room"><p className="py-10 text-center text-sm text-muted-foreground">Checking access…</p></Shell>;
+  if (!allowed)
+    return (
+      <Shell title="Control Room" subtitle="Restricted">
+        <Plate className="text-center">
+          <Lock className="mx-auto mb-2 h-8 w-8 text-primary" />
+          <p className="text-sm text-muted-foreground">The Control Room is only for recruiters and catering companies.</p>
+        </Plate>
+      </Shell>
+    );
+  return <ControlRoomLive />;
+}
+
+function ControlRoomLive() {
   const qc = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["control-room-stats"],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("control_room_stats");
+      const { data, error } = await supabase.rpc("control_room_stats_secure");
       if (error) throw error;
       return data as unknown as Stats;
     },

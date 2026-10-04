@@ -207,3 +207,9 @@
 @utility tracking-empire {
   letter-spacing: 0.28em;
 }
+
+@utility balloon-red {
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+  box-shadow: 0 8px 24px -6px color-mix(in oklab, var(--destructive) 70%, transparent);
+}
