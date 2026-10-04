@@ -83,7 +83,7 @@ type Achievements = { certificates: Certificate[]; completed: { title: string; p
 
 async function openUpload(path: string) {
   const { data, error } = await supabase.storage.from("certificates").createSignedUrl(path, 300);
-  if (error || !data) return toast.error("Could not open this certificate");
+  if (error || !data) { toast.error("Could not open this certificate"); return; }
   window.open(data.signedUrl, "_blank", "noopener");
 }
 
@@ -146,15 +146,15 @@ function UploadForm({ userId }: { userId: string }) {
   const [busy, setBusy] = useState(false);
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || !title.trim()) return toast.error("Add a title and choose a file");
-    if (file.size > 20 * 1024 * 1024) return toast.error("File must be under 20 MB");
+    if (!file || !title.trim()) { toast.error("Add a title and choose a file"); return; }
+    if (file.size > 20 * 1024 * 1024) { toast.error("File must be under 20 MB"); return; }
     setBusy(true);
     const path = `${userId}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
     const up = await supabase.storage.from("certificates").upload(path, file, { contentType: file.type });
-    if (up.error) { setBusy(false); return toast.error("Upload failed"); }
+    if (up.error) { setBusy(false); toast.error("Upload failed"); return; }
     const { error } = await supabase.from("uploaded_certificates").insert({ user_id: userId, title: title.trim(), issuer: issuer.trim() || null, issued_on: date || null, file_path: path, file_mime: file.type });
     setBusy(false);
-    if (error) return toast.error("Could not save certificate");
+    if (error) { toast.error("Could not save certificate"); return; }
     toast.success("Certificate uploaded");
     setTitle(""); setIssuer(""); setDate(""); setFile(null);
     (e.target as HTMLFormElement).reset();
