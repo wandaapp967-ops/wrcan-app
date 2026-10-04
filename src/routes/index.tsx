@@ -15,6 +15,7 @@ import {
 import { Medallion } from "@/components/Medallion";
 import { Shell } from "@/components/Shell";
 import { RoseButton } from "@/components/EmpireUI";
+import { useControlAccess } from "@/hooks/useBadges";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/")({
@@ -56,6 +57,8 @@ const TILES = [
 
 function Index() {
   const { user, profile, loading } = useAuth();
+  const { allowed: canControl } = useControlAccess();
+  const tiles = TILES.filter((t) => t.to !== "/control-room" || canControl);
 
   return (
     <Shell title="Build an Empire" subtitle="WRCAN Specialists">
@@ -77,7 +80,7 @@ function Index() {
       ) : null}
 
       <div className="grid grid-cols-2 gap-x-4 gap-y-6 pb-6">
-        {TILES.map((t) => (
+        {tiles.map((t) => (
           <Medallion key={t.label} {...t} />
         ))}
       </div>
