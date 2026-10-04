@@ -989,6 +989,39 @@ export type Database = {
         }
         Relationships: []
       }
+      uploaded_certificates: {
+        Row: {
+          created_at: string
+          file_mime: string | null
+          file_path: string
+          id: string
+          issued_on: string | null
+          issuer: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_mime?: string | null
+          file_path: string
+          id?: string
+          issued_on?: string | null
+          issuer?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_mime?: string | null
+          file_path?: string
+          id?: string
+          issued_on?: string | null
+          issuer?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1022,7 +1055,21 @@ export type Database = {
         Returns: string
       }
       auto_allocate_area: { Args: never; Returns: string }
+      can_view_control_room: { Args: never; Returns: boolean }
+      certificate_directory: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          city: string
+          completed: number
+          full_name: string
+          uploaded_certs: number
+          user_id: string
+          wanda_certs: number
+        }[]
+      }
       control_room_stats: { Args: never; Returns: Json }
+      control_room_stats_secure: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1036,6 +1083,8 @@ export type Database = {
         Returns: boolean
       }
       join_community: { Args: { _conversation_id: string }; Returns: string }
+      member_achievements: { Args: { _user_id: string }; Returns: Json }
+      my_unread_count: { Args: never; Returns: number }
       start_direct_chat: {
         Args: { _other_id: string; _title?: string }
         Returns: string
