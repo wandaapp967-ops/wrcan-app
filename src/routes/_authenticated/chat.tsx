@@ -66,6 +66,32 @@ function ChatPage() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [newChatOpen, setNewChatOpen] = useState(false);
 
+  // Mark the open chat as read (clears the red badge), and keep it read while open.
+  useEffect(() => {
+    if (!activeId || !user) return;
+    const markRead = async () => {
+      await supabase
+        .from("conversation_participants")
+        .update({ last_read_at: new Date().toISOString() })
+        .eq("conversation_id", activeId)
+        .eq("user_id", user.id);
+      void qc.invalidateQueries({ queryKey: ["unread-count"] });
+    };
+    void markRead();
+    const ch = supabase
+      .channel(`read-${activeId}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages", filter: `conversation_id=eq.${activeId}` },
+        () => void markRead(),
+      )
+      .subscribe();
+    return () => {
+      void markRead();
+      void supabase.removeChannel(ch);
+    };
+  }, [activeId, user, qc]);
+
   const { data: conversations = [] } = useQuery({
     queryKey: ["conversations", user?.id],
     enabled: !!user,
