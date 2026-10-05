@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DonorsRouteImport } from './routes/donors'
 import { Route as JobsRouteImport } from './routes/jobs'
+import { Route as LiveStudioRouteImport } from './routes/live-studio'
 import { Route as MediaStudioRouteImport } from './routes/media-studio'
 import { Route as ReelsRouteImport } from './routes/reels'
 import { Route as TrainingRouteImport } from './routes/training'
@@ -47,6 +48,11 @@ const DonorsRoute = DonorsRouteImport.update({
 const JobsRoute = JobsRouteImport.update({
   id: '/jobs',
   path: '/jobs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LiveStudioRoute = LiveStudioRouteImport.update({
+  id: '/live-studio',
+  path: '/live-studio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MediaStudioRoute = MediaStudioRouteImport.update({
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/donors': typeof DonorsRoute
   '/jobs': typeof JobsRouteWithChildren
+  '/live-studio': typeof LiveStudioRoute
   '/media-studio': typeof MediaStudioRoute
   '/reels': typeof ReelsRoute
   '/training': typeof TrainingRouteWithChildren
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/donors': typeof DonorsRoute
   '/jobs': typeof JobsRouteWithChildren
+  '/live-studio': typeof LiveStudioRoute
   '/media-studio': typeof MediaStudioRoute
   '/reels': typeof ReelsRoute
   '/training': typeof TrainingRouteWithChildren
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/donors': typeof DonorsRoute
   '/jobs': typeof JobsRouteWithChildren
+  '/live-studio': typeof LiveStudioRoute
   '/media-studio': typeof MediaStudioRoute
   '/reels': typeof ReelsRoute
   '/training': typeof TrainingRouteWithChildren
@@ -159,6 +168,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/donors'
     | '/jobs'
+    | '/live-studio'
     | '/media-studio'
     | '/reels'
     | '/training'
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/donors'
     | '/jobs'
+    | '/live-studio'
     | '/media-studio'
     | '/reels'
     | '/training'
@@ -192,6 +203,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/donors'
     | '/jobs'
+    | '/live-studio'
     | '/media-studio'
     | '/reels'
     | '/training'
@@ -210,6 +222,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DonorsRoute: typeof DonorsRoute
   JobsRoute: typeof JobsRouteWithChildren
+  LiveStudioRoute: typeof LiveStudioRoute
   MediaStudioRoute: typeof MediaStudioRoute
   ReelsRoute: typeof ReelsRoute
   TrainingRoute: typeof TrainingRouteWithChildren
@@ -250,6 +263,13 @@ declare module '@tanstack/react-router' {
       path: '/jobs'
       fullPath: '/jobs'
       preLoaderRoute: typeof JobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/live-studio': {
+      id: '/live-studio'
+      path: '/live-studio'
+      fullPath: '/live-studio'
+      preLoaderRoute: typeof LiveStudioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/media-studio': {
@@ -372,6 +392,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DonorsRoute: DonorsRoute,
   JobsRoute: JobsRouteWithChildren,
+  LiveStudioRoute: LiveStudioRoute,
   MediaStudioRoute: MediaStudioRoute,
   ReelsRoute: ReelsRoute,
   TrainingRoute: TrainingRouteWithChildren,
