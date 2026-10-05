@@ -211,7 +211,7 @@ function LiveStudio() {
               <Btn label="Camera (C)" on={cam} onClick={toggleCam}>{cam ? <Camera className="h-4 w-4" /> : <CameraOff className="h-4 w-4" />}</Btn>
               <Btn label="Record (R)" on={rec} onClick={() => setRec(!rec)}><Circle className="h-4 w-4" />Record</Btn>
               <Btn label="Breakout rooms" onClick={() => {
-                const r: string[][] = [[], []]; people.forEach((p, i) => r[i % 2].push(p.name)); setRooms(r);
+                const r: string[][] = [[], []]; people.forEach((p, i) => r[i % 2]?.push(p.name)); setRooms(r);
               }}><Users className="h-4 w-4" />Breakouts</Btn>
               <div className="ml-auto flex gap-2">
                 <Btn label="Go live" on={live} onClick={() => { setLive(!live); say(live ? "Stream paused" : "You are live (practice mode)"); }}><Radio className="h-4 w-4" />{live ? "Pause" : "Go live"}</Btn>
