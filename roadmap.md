@@ -1,3 +1,4 @@
 - [x] Add the radio/media training demo with practical presenting exercises.
 - [x] Add a shareable online video classroom for students.
 - [x] Link the new page from the home screen and verify it.
+- [x] Enhance Live Studio with radio, teleprompter, vlogger and producer training desks.

@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Keep the media-studio practice local to the browser and embed shared live rooms through Jitsi; this allows immediate demo recordings without storing student video or operating a call server.
+- Keep Media House Hub desk simulations and uploaded cover-art previews browser-local; this protects student practice media and keeps demonstrations instant.
