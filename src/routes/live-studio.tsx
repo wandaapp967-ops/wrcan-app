@@ -37,6 +37,7 @@ const DESKS: { id: Desk; title: string; short: string; icon: typeof Radio }[] = 
 ];
 
 const PROMPTER_SCRIPT = `Good evening, South Africa, and welcome to Wanda Tonight.\n\nOur top story: young creators across the country are turning practical media skills into new careers.\n\nTonight we meet the voices, presenters and producers shaping a more connected future.\n\nStay with us for interviews, community stories and opportunities you can act on today.\n\nI'm your presenter. This is Wanda Tonight.`;
+const WAVE_HEIGHTS = ["h-3", "h-7", "h-5", "h-9", "h-4", "h-8", "h-6", "h-10", "h-5", "h-7", "h-3", "h-8", "h-4", "h-6"];
 
 const KEY = "wanda-live-studio";
 const initialPeople: P[] = [
@@ -259,7 +260,7 @@ function LiveStudio() {
             <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-primary">Radio Presenter Desk</p>
             <h2 className="font-display mt-1 text-xl">Voice control</h2>
             <div className="mt-4 flex h-12 items-end gap-1 rounded-md border border-border bg-background/50 p-2" aria-label={radioOn && !radioMuted ? "Sound wave active" : "Sound wave idle"}>
-              {[3, 7, 5, 9, 4, 8, 6, 10, 5, 7, 3, 8, 4, 6].map((height, index) => <span key={index} className={`w-full rounded-sm bg-primary transition-all ${radioOn && !radioMuted ? "animate-pulse" : "opacity-25"}`} style={{ height: `${height * 3}px` }} />)}
+              {WAVE_HEIGHTS.map((height, index) => <span key={index} className={`w-full rounded-sm bg-primary transition-all ${height} ${radioOn && !radioMuted ? "animate-pulse" : "opacity-25"}`} />)}
             </div>
           </div>
           <div className="flex flex-wrap gap-2 md:w-52 md:flex-col">
