@@ -341,7 +341,7 @@ function LiveStudio() {
                 <p className="mb-2 px-2 text-[0.6rem] font-semibold uppercase tracking-widest text-muted-foreground">Training control desks</p>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-1">
                   {DESKS.map(({ id, title, short, icon: Icon }, index) => (
-                    <Button key={id} type="button" variant={desk === id ? "default" : "outline"} onClick={() => setDesk(id)} className="h-auto min-h-16 justify-start whitespace-normal border-2 px-3 py-3 text-left" aria-pressed={desk === id}>
+                    <Button key={id} type="button" variant={desk === id ? "default" : "outline"} onClick={() => setDesk(id)} className="h-auto min-h-16 justify-start whitespace-normal border-2 px-3 py-3 text-left" aria-label={title} aria-pressed={desk === id}>
                       <span className="flex size-7 shrink-0 items-center justify-center rounded border border-current/30"><Icon /></span>
                       <span><span className="block text-[0.6rem] opacity-70">0{index + 1}</span><span className="hidden leading-tight sm:block">{title}</span><span className="leading-tight sm:hidden">{short}</span></span>
                     </Button>
