@@ -1,18 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import {
-  ArrowLeft, Camera, CameraOff, Circle, Coffee, Hand, Mic, MicOff, MessageSquare,
-  MonitorUp, Radio, Send, Sparkles, ThumbsUp, Timer, UserPlus, Users, Wifi, X, BarChart3, Check,
+  ArrowLeft, BellRing, Camera, CameraOff, Check, ChevronDown, ChevronUp, Circle, Clapperboard,
+  Coffee, Gauge, Hand, Heart, ImagePlus, Mic, MicOff, MessageSquare, MonitorUp, Pause, Play,
+  Radio, Send, Sparkles, ThumbsUp, Timer, Upload, UserPlus, Users, Wifi, X, BarChart3,
 } from "lucide-react";
 import logoAsset from "@/assets/wanda-logo.png.asset.json";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/live-studio")({
   head: () => ({
     meta: [
-      { title: "Live Studio — Wanda Broadcast Control Room" },
-      { name: "description", content: "Practise running a live class or broadcast: scenes, preview and program, polls, Q&A, breakout rooms and a studio assistant." },
-      { property: "og:title", content: "Wanda Live Studio" },
-      { property: "og:description", content: "A broadcast control room for Wanda facilitators and media trainees." },
+      { title: "Media House Hub — Wanda Live Studio" },
+      { name: "description", content: "Train as a radio presenter, actor, vlogger or producer in Wanda's interactive Media House Hub." },
+      { property: "og:title", content: "Wanda Media House Hub" },
+      { property: "og:description", content: "Professional hands-on media training desks for presenters, actors, vloggers and producers." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -24,6 +26,17 @@ type Scene = "Presenter" | "Interview" | "Panel" | "Screen share" | "Break";
 const SCENES: Scene[] = ["Presenter", "Interview", "Panel", "Screen share", "Break"];
 type P = { id: number; name: string; hand: boolean; muted: boolean; stage: boolean };
 type Q = { id: number; text: string; votes: number; answered: boolean };
+type Desk = "radio" | "prompter" | "vlogger" | "producer";
+type VloggerAlert = { id: number; icon: "heart" | "comment" | "follow"; text: string };
+
+const DESKS: { id: Desk; title: string; short: string; icon: typeof Radio }[] = [
+  { id: "radio", title: "Radio Presenter Desk", short: "Radio", icon: Radio },
+  { id: "prompter", title: "TV / Actor Prompter", short: "Prompter", icon: Clapperboard },
+  { id: "vlogger", title: "Vlogger Engagement Sim", short: "Vlogger", icon: BellRing },
+  { id: "producer", title: "Producer Booth", short: "Producer", icon: ImagePlus },
+];
+
+const PROMPTER_SCRIPT = `Good evening, South Africa, and welcome to Wanda Tonight.\n\nOur top story: young creators across the country are turning practical media skills into new careers.\n\nTonight we meet the voices, presenters and producers shaping a more connected future.\n\nStay with us for interviews, community stories and opportunities you can act on today.\n\nI'm your presenter. This is Wanda Tonight.`;
 
 const KEY = "wanda-live-studio";
 const initialPeople: P[] = [
@@ -65,7 +78,20 @@ function LiveStudio() {
   const [aiLog, setAiLog] = useState<string[]>([]);
   const [toast, setToast] = useState("");
   const [confirmEnd, setConfirmEnd] = useState(false);
+  const [desk, setDesk] = useState<Desk>("radio");
+  const [radioOn, setRadioOn] = useState(false);
+  const [radioMuted, setRadioMuted] = useState(false);
+  const [prompterRunning, setPrompterRunning] = useState(false);
+  const [prompterSpeed, setPrompterSpeed] = useState(2);
+  const [vloggerAlerts, setVloggerAlerts] = useState<VloggerAlert[]>([]);
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
+  const [coverName, setCoverName] = useState("Wanda Evening Drive");
+  const [dragging, setDragging] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const prompterRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const coverRef = useRef<string | null>(null);
+  const alertIdRef = useRef(0);
 
   const say = (t: string) => { setToast(t); setTimeout(() => setToast(""), 2200); };
 
@@ -90,6 +116,23 @@ function LiveStudio() {
     if (videoRef.current) videoRef.current.srcObject = stream;
   }, [stream, program]);
   useEffect(() => () => stream?.getTracks().forEach((t) => t.stop()), [stream]);
+
+  useEffect(() => {
+    if (!prompterRunning) return;
+    const timer = window.setInterval(() => {
+      const element = prompterRef.current;
+      if (!element) return;
+      element.scrollTop += prompterSpeed;
+      if (element.scrollTop + element.clientHeight >= element.scrollHeight - 2) {
+        element.scrollTop = 0;
+      }
+    }, 45);
+    return () => window.clearInterval(timer);
+  }, [prompterRunning, prompterSpeed]);
+
+  useEffect(() => () => {
+    if (coverRef.current) URL.revokeObjectURL(coverRef.current);
+  }, []);
 
   const toggleCam = async () => {
     if (cam) { stream?.getTracks().forEach((t) => t.stop()); setStream(null); setCam(false); return; }
@@ -136,6 +179,28 @@ function LiveStudio() {
   const onStage = people.filter((p) => p.stage);
   const totalVotes = poll.opts.reduce((a, o) => a + o.v, 0) || 1;
 
+  const triggerVloggerAlert = (kind: VloggerAlert["icon"]) => {
+    const content = {
+      heart: "Nomsa and 24 others liked your live",
+      comment: "Thabo: This is powerful — keep going!",
+      follow: "12 new viewers followed your channel",
+    }[kind];
+    const id = ++alertIdRef.current;
+    setVloggerAlerts((items) => [...items.slice(-2), { id, icon: kind, text: content }]);
+    window.setTimeout(() => setVloggerAlerts((items) => items.filter((item) => item.id !== id)), 4200);
+  };
+
+  const loadCover = (file?: File) => {
+    if (!file || !file.type.startsWith("image/")) { say("Choose a JPG, PNG or WebP cover image"); return; }
+    if (coverRef.current) URL.revokeObjectURL(coverRef.current);
+    const nextUrl = URL.createObjectURL(file);
+    coverRef.current = nextUrl;
+    setCoverUrl(nextUrl);
+    setCoverName(file.name.replace(/\.[^.]+$/, "") || "Now playing");
+    setDragging(false);
+    say("Cover art is now playing");
+  };
+
   const Canvas = ({ scene, small }: { scene: Scene; small?: boolean }) => (
     <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-border bg-card">
       {scene === "Break" ? (
@@ -165,24 +230,100 @@ function LiveStudio() {
       )}
       {!small && overlay.captions && <div className="absolute inset-x-0 bottom-10 text-center text-xs text-foreground"><span className="bg-background/80 px-2">Welcome to today's Wanda session…</span></div>}
       {!small && overlay.timer && <div className="absolute top-2 left-2 rounded bg-background/80 px-2 text-xs text-primary">{fmt(secs)}</div>}
+      {!small && vloggerAlerts.length > 0 && (
+        <div className="absolute right-3 bottom-3 z-10 w-[min(85%,18rem)] space-y-2" aria-live="polite">
+          {vloggerAlerts.map((item) => (
+            <div key={item.id} className="flex items-center gap-2 rounded-md border border-primary/50 bg-background/90 px-3 py-2 text-xs shadow-lg backdrop-blur">
+              {item.icon === "heart" ? <Heart className="size-4 fill-destructive text-destructive" /> : item.icon === "comment" ? <MessageSquare className="size-4 text-primary" /> : <UserPlus className="size-4 text-primary" />}
+              <span className="flex-1">{item.text}</span>
+              <Button type="button" variant="ghost" size="icon" className="size-7" onClick={() => setVloggerAlerts((items) => items.filter((alert) => alert.id !== item.id))} aria-label="Dismiss alert"><X /></Button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 
   const Btn = ({ on, onClick, children, label }: { on?: boolean; onClick: () => void; children: React.ReactNode; label: string }) => (
-    <button title={label} aria-label={label} onClick={onClick}
-      className={`flex h-9 items-center gap-1 rounded-full border px-3 text-xs ${on ? "rose-metal border-transparent" : "border-border bg-card text-foreground hover:bg-accent"}`}>
+    <Button type="button" title={label} aria-label={label} onClick={onClick} variant={on ? "default" : "outline"}
+      className="h-9 rounded-full px-3 text-xs">
       {children}
-    </button>
+    </Button>
+  );
+
+  const DeskControls = () => (
+    <section className="glass-plate rounded-xl border border-primary/20 p-4" aria-label={`${DESKS.find((item) => item.id === desk)?.title} controls`}>
+      {desk === "radio" && (
+        <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
+          <div>
+            <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-primary">Radio Presenter Desk</p>
+            <h2 className="font-display mt-1 text-xl">Voice control</h2>
+            <div className="mt-4 flex h-12 items-end gap-1 rounded-md border border-border bg-background/50 p-2" aria-label={radioOn && !radioMuted ? "Sound wave active" : "Sound wave idle"}>
+              {[3, 7, 5, 9, 4, 8, 6, 10, 5, 7, 3, 8, 4, 6].map((height, index) => <span key={index} className={`w-full rounded-sm bg-primary transition-all ${radioOn && !radioMuted ? "animate-pulse" : "opacity-25"}`} style={{ height: `${height * 3}px` }} />)}
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2 md:w-52 md:flex-col">
+            <Button type="button" variant={radioOn ? "destructive" : "outline"} className="h-11 flex-1 border-2 md:w-full" onClick={() => setRadioOn((value) => !value)}><Radio />{radioOn ? "ON AIR" : "Go on air"}</Button>
+            <Button type="button" variant="outline" className="h-11 flex-1 border-2 md:w-full" onClick={() => setRadioMuted((value) => !value)}>{radioMuted ? <MicOff /> : <Mic />}{radioMuted ? "Mic muted" : "Mic live"}</Button>
+          </div>
+        </div>
+      )}
+      {desk === "prompter" && (
+        <div className="grid gap-4 md:grid-cols-[1fr_220px]">
+          <div ref={prompterRef} className="h-44 overflow-y-auto rounded-md border-2 border-primary/30 bg-background/70 px-5 py-12 text-center font-display text-xl leading-relaxed scroll-smooth">
+            <div className="whitespace-pre-line">{PROMPTER_SCRIPT}</div>
+            <div className="h-32" />
+          </div>
+          <div className="space-y-3 rounded-md border border-border p-3">
+            <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-primary">Prompter speed</p>
+            <Button type="button" variant={prompterRunning ? "default" : "outline"} className="h-11 w-full border-2" onClick={() => setPrompterRunning((value) => !value)}>{prompterRunning ? <Pause /> : <Play />}{prompterRunning ? "Pause script" : "Roll script"}</Button>
+            <div className="grid grid-cols-[40px_1fr_40px] items-center gap-2">
+              <Button type="button" size="icon" variant="outline" onClick={() => setPrompterSpeed((value) => Math.max(1, value - 1))} aria-label="Slower prompter"><ChevronDown /></Button>
+              <span className="text-center text-xs"><Gauge className="mr-1 inline size-4 text-primary" />Speed {prompterSpeed}</span>
+              <Button type="button" size="icon" variant="outline" onClick={() => setPrompterSpeed((value) => Math.min(5, value + 1))} aria-label="Faster prompter"><ChevronUp /></Button>
+            </div>
+          </div>
+        </div>
+      )}
+      {desk === "vlogger" && (
+        <div>
+          <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-primary">Vlogger Engagement Sim</p>
+          <h2 className="font-display mt-1 text-xl">Test audience reactions</h2>
+          <div className="mt-4 grid gap-2 sm:grid-cols-3">
+            <Button type="button" variant="outline" className="h-12 border-2" onClick={() => triggerVloggerAlert("heart")}><Heart />Trigger likes</Button>
+            <Button type="button" variant="outline" className="h-12 border-2" onClick={() => triggerVloggerAlert("comment")}><MessageSquare />Trigger comment</Button>
+            <Button type="button" variant="outline" className="h-12 border-2" onClick={() => triggerVloggerAlert("follow")}><UserPlus />Trigger followers</Button>
+          </div>
+        </div>
+      )}
+      {desk === "producer" && (
+        <div className="grid gap-4 sm:grid-cols-[1fr_240px]">
+          <div onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); loadCover(event.dataTransfer.files[0]); }} className={`flex min-h-40 flex-col items-center justify-center rounded-md border-2 border-dashed p-5 text-center transition-colors ${dragging ? "border-primary bg-primary/10" : "border-border bg-background/40"}`}>
+            <Upload className="size-7 text-primary" />
+            <p className="mt-2 text-sm font-semibold">Drop cover art here</p>
+            <p className="mt-1 text-xs text-muted-foreground">JPG, PNG or WebP stays on this device</p>
+            <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(event) => loadCover(event.target.files?.[0])} />
+            <Button type="button" variant="outline" className="mt-3 border-2" onClick={() => fileRef.current?.click()}><ImagePlus />Browse files</Button>
+          </div>
+          <div className="overflow-hidden rounded-md border border-primary/40 bg-card shadow-lg">
+            <div className="aspect-square bg-muted">
+              {coverUrl ? <img src={coverUrl} alt="Now playing cover art" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center"><img src={logoAsset.url} alt="Wanda placeholder cover" className="h-20 opacity-70" /></div>}
+            </div>
+            <div className="p-3"><p className="text-[0.6rem] uppercase tracking-widest text-primary">Now playing</p><p className="mt-1 truncate font-display text-lg">{coverName}</p></div>
+          </div>
+        </div>
+      )}
+    </section>
   );
 
   return (
     <div className="gold-pattern min-h-screen text-foreground">
-      <div className="mx-auto max-w-6xl space-y-3 p-3">
+      <div className="mx-auto max-w-[1500px] space-y-3 p-3">
         <header className="glass-plate flex flex-wrap items-center justify-between gap-2 rounded-xl px-3 py-2">
           <div className="flex items-center gap-2">
             <Link to="/" aria-label="Back home"><ArrowLeft className="h-5 w-5 text-primary" /></Link>
             <img src={logoAsset.url} alt="Wanda" className="h-8" />
-            <h1 className="font-display rose-text text-lg font-semibold uppercase tracking-wide">Live Studio</h1>
+            <h1 className="font-display rose-text text-lg font-semibold uppercase tracking-wide">Media House Hub</h1>
           </div>
           <div className="flex items-center gap-2 text-xs">
             <span className="flex items-center gap-1 text-muted-foreground"><Wifi className="h-4 w-4 text-primary" />Good</span>
@@ -192,19 +333,34 @@ function LiveStudio() {
           </div>
         </header>
 
-        <div className="grid gap-3 lg:grid-cols-[1fr_320px]">
+        <div className="grid gap-3 xl:grid-cols-[1fr_320px]">
           <div className="space-y-3">
-            <div className="grid gap-3 md:grid-cols-[1fr_2fr]">
-              <div className="glass-plate rounded-xl p-2">
+            <div className="grid gap-3 lg:grid-cols-[210px_1fr]">
+              <nav className="glass-plate rounded-xl border border-primary/20 p-2" aria-label="Training control desks">
+                <p className="mb-2 px-2 text-[0.6rem] font-semibold uppercase tracking-widest text-muted-foreground">Training control desks</p>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-1">
+                  {DESKS.map(({ id, title, short, icon: Icon }, index) => (
+                    <Button key={id} type="button" variant={desk === id ? "default" : "outline"} onClick={() => setDesk(id)} className="h-auto min-h-16 justify-start whitespace-normal border-2 px-3 py-3 text-left" aria-pressed={desk === id}>
+                      <span className="flex size-7 shrink-0 items-center justify-center rounded border border-current/30"><Icon /></span>
+                      <span><span className="block text-[0.6rem] opacity-70">0{index + 1}</span><span className="hidden leading-tight sm:block">{title}</span><span className="leading-tight sm:hidden">{short}</span></span>
+                    </Button>
+                  ))}
+                </div>
+              </nav>
+              <div className="grid gap-3 md:grid-cols-[1fr_2fr]">
+                <div className="glass-plate rounded-xl p-2">
                 <p className="mb-1 text-[0.6rem] uppercase tracking-widest text-muted-foreground">Preview</p>
                 <Canvas scene={preview} small />
-                <button onClick={take} className="rose-metal mt-2 w-full rounded-full py-2 text-xs font-semibold uppercase tracking-widest">Take live (Space)</button>
-              </div>
-              <div className={`glass-plate rounded-xl p-2 transition-opacity duration-200 ${fade ? "opacity-30" : ""}`}>
-                <p className="mb-1 text-[0.6rem] uppercase tracking-widest text-primary">Program · live output</p>
-                <Canvas scene={program} />
+                  <Button type="button" onClick={take} className="mt-2 w-full rounded-full text-xs uppercase tracking-widest">Take live (Space)</Button>
+                </div>
+                <div className={`glass-plate rounded-xl p-2 transition-opacity duration-200 ${fade ? "opacity-30" : ""}`}>
+                  <p className="mb-1 text-[0.6rem] uppercase tracking-widest text-primary">Program · live output</p>
+                  <Canvas scene={program} />
+                </div>
               </div>
             </div>
+
+            <DeskControls />
 
             <div className="glass-plate flex flex-wrap items-center gap-2 rounded-xl p-2">
               <Btn label="Microphone (M)" on={mic} onClick={() => setMic(!mic)}>{mic ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}</Btn>
