@@ -114,7 +114,7 @@ function ControlRoomPage() {
       <Shell title="Control Room" subtitle="Restricted">
         <Plate className="text-center">
           <Lock className="mx-auto mb-2 h-8 w-8 text-primary" />
-          <p className="text-sm text-muted-foreground">The Control Room is only for recruiters and catering companies.</p>
+          <p className="text-sm text-muted-foreground">The Control Room is private to the Wanda owner.</p>
         </Plate>
       </Shell>
     );
@@ -246,6 +246,9 @@ function ControlRoomLive() {
             <Stat icon={Award} label="Completions" value={n(data?.completions)} />
             <Stat icon={Briefcase} label="Applications" value={n(data?.applications)} />
           </div>
+
+          <MembersPanel />
+          <UploadsPanel />
 
           <Plate>
             <h2 className="font-display rose-text text-sm font-semibold tracking-widest uppercase">
