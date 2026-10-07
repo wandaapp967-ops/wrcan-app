@@ -163,6 +163,7 @@ function ReelUpload({ defaultArea, onDone }: { defaultArea: string; onDone: () =
       toast.error(up.error.message);
       return;
     }
+    const gps = await (await import("@/lib/gps")).getGps();
     const { error } = await supabase.from("talent_reels").insert({
       user_id: user.id,
       kind,
@@ -172,6 +173,7 @@ function ReelUpload({ defaultArea, onDone }: { defaultArea: string; onDone: () =
       area: area.trim() || null,
       media_path: path,
       media_mime: prepared.type || null,
+      ...gps,
     });
     setBusy(false);
     if (error) {
