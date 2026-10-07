@@ -95,10 +95,12 @@ function StatusPage() {
   const post = async (extra: Partial<StatusPost> = {}) => {
     if (!user) return;
     setBusy(true);
+    const gps = await (await import("@/lib/gps")).getGps();
     const { error } = await supabase.from("status_posts").insert({
       user_id: user.id,
       kind: "text",
       body: body.trim() || null,
+      ...gps,
       ...extra,
     });
     setBusy(false);

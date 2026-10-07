@@ -152,7 +152,8 @@ function UploadForm({ userId }: { userId: string }) {
     const path = `${userId}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
     const up = await supabase.storage.from("certificates").upload(path, file, { contentType: file.type });
     if (up.error) { setBusy(false); toast.error("Upload failed"); return; }
-    const { error } = await supabase.from("uploaded_certificates").insert({ user_id: userId, title: title.trim(), issuer: issuer.trim() || null, issued_on: date || null, file_path: path, file_mime: file.type });
+    const gps = await (await import("@/lib/gps")).getGps();
+    const { error } = await supabase.from("uploaded_certificates").insert({ user_id: userId, title: title.trim(), issuer: issuer.trim() || null, issued_on: date || null, file_path: path, file_mime: file.type, ...gps });
     setBusy(false);
     if (error) { toast.error("Could not save certificate"); return; }
     toast.success("Certificate uploaded");

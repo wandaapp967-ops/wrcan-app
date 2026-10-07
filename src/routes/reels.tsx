@@ -2,7 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Eye, Heart, Loader2, Upload, Volume2, VolumeX } from "lucide-react";
+import { Copy, Download, Eye, Forward, Heart, Loader2, Share2, Trash2, Upload, Volume2, VolumeX } from "lucide-react";
+import { ShareSheet } from "@/components/ShareSheet";
 import logoAsset from "@/assets/wanda-logo.png.asset.json";
 import { Shell } from "@/components/Shell";
 import { Field, Plate, RoseButton, areaClass, inputClass } from "@/components/EmpireUI";
@@ -163,6 +164,7 @@ function ReelUpload({ defaultArea, onDone }: { defaultArea: string; onDone: () =
       toast.error(up.error.message);
       return;
     }
+    const gps = await (await import("@/lib/gps")).getGps();
     const { error } = await supabase.from("talent_reels").insert({
       user_id: user.id,
       kind,
@@ -172,6 +174,7 @@ function ReelUpload({ defaultArea, onDone }: { defaultArea: string; onDone: () =
       area: area.trim() || null,
       media_path: path,
       media_mime: prepared.type || null,
+      ...gps,
     });
     setBusy(false);
     if (error) {
@@ -420,6 +423,53 @@ function ReelCard({ reel }: { reel: Reel }) {
       >
         <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} /> {likes.length}
       </button>
+      <ReelMenu reel={reel} url={url} />
     </Plate>
+  );
+}
+
+function ReelMenu({ reel, url }: { reel: Reel; url: string | null }) {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  const navigate = useNavigate();
+  const [share, setShare] = useState(false);
+  const link = typeof window !== "undefined" ? `${window.location.origin}/reels#${reel.id}` : "";
+  const text = `${reel.title} — Talent Reel on Wanda`;
+  const btn = "inline-flex items-center gap-1 rounded-lg border border-primary/40 px-2.5 py-1 text-xs hover:bg-primary/10";
+  const del = async () => {
+    if (!confirm("Delete this reel for everyone?")) return;
+    await supabase.storage.from("talent").remove([reel.media_path]);
+    const { error } = await supabase.from("talent_reels").delete().eq("id", reel.id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Reel deleted");
+    void qc.invalidateQueries({ queryKey: ["talent-reels"] });
+  };
+  return (
+    <div className="flex flex-wrap gap-2 pt-1">
+      <button type="button" className={btn} onClick={() => setShare(true)}><Share2 className="h-3.5 w-3.5" /> Share</button>
+      <button
+        type="button"
+        className={btn}
+        onClick={() => {
+          void navigator.clipboard?.writeText(`${text} ${link}`);
+          toast.success("Copied — paste it into any chat to forward");
+          void navigate({ to: "/chat" });
+        }}
+      >
+        <Forward className="h-3.5 w-3.5" /> Forward
+      </button>
+      <button type="button" className={btn} onClick={() => { void navigator.clipboard?.writeText(link); toast.success("Link copied"); }}>
+        <Copy className="h-3.5 w-3.5" /> Copy link
+      </button>
+      {url ? (
+        <a className={btn} href={url} download target="_blank" rel="noreferrer"><Download className="h-3.5 w-3.5" /> Save</a>
+      ) : null}
+      {user?.id === reel.user_id ? (
+        <button type="button" className={`${btn} border-destructive/60 text-destructive`} onClick={() => void del()}>
+          <Trash2 className="h-3.5 w-3.5" /> Delete
+        </button>
+      ) : null}
+      {share ? <ShareSheet target={{ text, url: link }} onClose={() => setShare(false)} /> : null}
+    </div>
   );
 }
