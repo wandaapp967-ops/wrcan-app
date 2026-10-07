@@ -16,6 +16,7 @@ import { Plate } from "@/components/EmpireUI";
 import { supabase } from "@/integrations/supabase/client";
 import { useControlAccess } from "@/hooks/useBadges";
 import { Lock } from "lucide-react";
+import { MembersPanel, UploadsPanel } from "@/components/ControlRoomPanels";
 
 export const Route = createFileRoute("/_authenticated/control-room")({
   head: () => ({
