@@ -847,6 +847,8 @@ export type Database = {
           expires_at: string
           id: string
           kind: string
+          latitude: number | null
+          longitude: number | null
           media_mime: string | null
           media_path: string | null
           updated_at: string
@@ -859,6 +861,8 @@ export type Database = {
           expires_at?: string
           id?: string
           kind?: string
+          latitude?: number | null
+          longitude?: number | null
           media_mime?: string | null
           media_path?: string | null
           updated_at?: string
@@ -871,6 +875,8 @@ export type Database = {
           expires_at?: string
           id?: string
           kind?: string
+          latitude?: number | null
+          longitude?: number | null
           media_mime?: string | null
           media_path?: string | null
           updated_at?: string
@@ -887,6 +893,8 @@ export type Database = {
           id: string
           is_public: boolean
           kind: string
+          latitude: number | null
+          longitude: number | null
           media_mime: string | null
           media_path: string
           skill_tag: string | null
@@ -903,6 +911,8 @@ export type Database = {
           id?: string
           is_public?: boolean
           kind?: string
+          latitude?: number | null
+          longitude?: number | null
           media_mime?: string | null
           media_path: string
           skill_tag?: string | null
@@ -919,6 +929,8 @@ export type Database = {
           id?: string
           is_public?: boolean
           kind?: string
+          latitude?: number | null
+          longitude?: number | null
           media_mime?: string | null
           media_path?: string
           skill_tag?: string | null
@@ -997,6 +1009,8 @@ export type Database = {
           id: string
           issued_on: string | null
           issuer: string | null
+          latitude: number | null
+          longitude: number | null
           title: string
           user_id: string
         }
@@ -1007,6 +1021,8 @@ export type Database = {
           id?: string
           issued_on?: string | null
           issuer?: string | null
+          latitude?: number | null
+          longitude?: number | null
           title: string
           user_id: string
         }
@@ -1017,6 +1033,8 @@ export type Database = {
           id?: string
           issued_on?: string | null
           issuer?: string | null
+          latitude?: number | null
+          longitude?: number | null
           title?: string
           user_id?: string
         }
@@ -1068,8 +1086,31 @@ export type Database = {
           wanda_certs: number
         }[]
       }
+      control_room_members: {
+        Args: never
+        Returns: {
+          city: string
+          full_name: string
+          id: string
+          last_seen_at: string
+          member_type: string
+          suburb: string
+        }[]
+      }
       control_room_stats: { Args: never; Returns: Json }
       control_room_stats_secure: { Args: never; Returns: Json }
+      control_room_uploads: {
+        Args: never
+        Returns: {
+          created_at: string
+          full_name: string
+          kind: string
+          latitude: number
+          longitude: number
+          title: string
+          user_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

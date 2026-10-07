@@ -8,6 +8,13 @@
       "when": 1791105067516,
       "tag": "0000_certs_unread_control",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791375490477,
+      "tag": "0001_control_room_owner_gps",
+      "breakpoints": true
     }
   ]
 }
