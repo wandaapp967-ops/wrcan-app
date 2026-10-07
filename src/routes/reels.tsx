@@ -440,7 +440,7 @@ function ReelMenu({ reel, url }: { reel: Reel; url: string | null }) {
     if (!confirm("Delete this reel for everyone?")) return;
     await supabase.storage.from("talent").remove([reel.media_path]);
     const { error } = await supabase.from("talent_reels").delete().eq("id", reel.id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Reel deleted");
     void qc.invalidateQueries({ queryKey: ["talent-reels"] });
   };
