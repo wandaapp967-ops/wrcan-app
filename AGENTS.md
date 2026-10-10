@@ -53,3 +53,33 @@ Non-obvious details worth remembering:
   shows the `web` service healthy. A live dev server serves unhashed `/src/...`
   module URLs and `data-tsd-source` attributes — if you see hashed bundles instead,
   the compose file is running a production build and needs fixing.
+
+## Real-time map
+
+Everything on the live surfaces is driven by Supabase (`shunfxazqsqpelgxfyqg`) rather than by
+polling — if a surface looks stale, the channel is the first thing to check, not the timer.
+
+- **Jobs** — `jobs.tsx` subscribes to `postgres_changes` on `jobs`; `/jobs/$jobId` subscribes on
+  `applications` (filtered by `job_id`) so an application status change appears without a refresh.
+  `LiveJobsFeed` aggregates three public job APIs (Remotive, Jobicy, Arbeitnow): that source is
+  pull-only, so it re-fetches every 60 s and shows a ticking "Updated Ns ago" label instead.
+- **Donors** — one `donations-live` channel invalidates `["donations"]` on any `donations` change
+  (and toasts new pledges from other people) plus `["donation_campaigns"]`.
+- **Notifications** — `NotificationBalloons` listens to `messages` INSERTs; `useUnreadCount` also
+  subscribes to `messages` + `conversation_participants` so the nav badge moves instantly.
+- **Control room** — one channel over `messages`, `profiles`, `talent_reels`, `applications`,
+  `certificates`, `enrollments`, `status_posts` invalidates `["control-room-stats"]`.
+- **Presence** — `PresenceProvider` (`usePresence`) is one app-wide channel and now broadcasts the
+  member's display name, so `onlineMembers` gives names as well as ids. `useRoomPresence(roomCode)`
+  is a separate presence channel per Media Studio room code; it is presence only — no media and
+  nothing persisted, which keeps the "studio practice stays browser-local" rule intact.
+- Do not reintroduce `refetchInterval` polling on these surfaces; it was removed deliberately.
+
+Live-looking UI: `src/lib/live-time.ts` exports `timeAgo()` and `useTick()` (a 5 s re-render timer)
+and `src/components/LiveBadge.tsx` exports `LivePulse`. Relative timestamps must be paired with
+`useTick()` or they freeze at the render value.
+
+Navigation smoothing: `src/router.tsx` sets `defaultPendingComponent` (`RoutePending`) and pending
+timings, and the two job routes declare `loader`s that `prefetchQuery` into the React Query cache —
+combined with `defaultPreload: "intent"` that is what makes hovering a link then opening it instant.
+`src/components/Skeleton.tsx` provides the plate-shaped loaders used while a list first loads.

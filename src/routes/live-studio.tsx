@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import logoAsset from "@/assets/wanda-logo.png.asset.json";
 import { Button } from "@/components/ui/button";
+import { usePresence } from "@/hooks/usePresence";
 
 export const Route = createFileRoute("/live-studio")({
   head: () => ({
@@ -49,6 +50,7 @@ const initialPeople: P[] = [
 ];
 
 function LiveStudio() {
+  const { onlineCount } = usePresence();
   const [preview, setPreview] = useState<Scene>("Presenter");
   const [program, setProgram] = useState<Scene>("Break");
   const [fade, setFade] = useState(false);
@@ -327,7 +329,17 @@ function LiveStudio() {
             <h1 className="font-display rose-text text-lg font-semibold uppercase tracking-wide">Media House Hub</h1>
           </div>
           <div className="flex items-center gap-2 text-xs">
-            <span className="flex items-center gap-1 text-muted-foreground"><Wifi className="h-4 w-4 text-primary" />Good</span>
+            {onlineCount > 0 ? (
+              <span className="flex items-center gap-1 text-muted-foreground" title="Creators online in the Media House right now">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-70" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+                </span>
+                {onlineCount} online
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 text-muted-foreground"><Wifi className="h-4 w-4 text-primary" />Good</span>
+            )}
             <span className="flex items-center gap-1 text-muted-foreground"><Timer className="h-4 w-4" />{fmt(secs)}</span>
             {rec && <span className="balloon-red rounded-full px-2 py-0.5">● REC</span>}
             {live ? <span className="balloon-red rounded-full px-2 py-0.5">LIVE</span> : <span className="text-muted-foreground">Studio ready</span>}

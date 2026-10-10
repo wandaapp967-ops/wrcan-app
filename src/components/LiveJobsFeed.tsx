@@ -3,24 +3,19 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { ExternalLink, Radio } from "lucide-react";
 import { Plate } from "@/components/EmpireUI";
+import { timeAgo, useTick } from "@/lib/live-time";
 import { getLiveJobs } from "@/lib/live-jobs.functions";
 
 const REGIONS = ["All", "South Africa", "Europe", "Americas", "Worldwide"] as const;
 
-function ago(iso: string) {
-  const m = Math.max(0, Math.round((Date.now() - +new Date(iso)) / 60000));
-  if (m < 60) return `${m}m ago`;
-  if (m < 1440) return `${Math.round(m / 60)}h ago`;
-  return `${Math.round(m / 1440)}d ago`;
-}
-
 export function LiveJobsFeed({ term }: { term: string }) {
   const fetchJobs = useServerFn(getLiveJobs);
   const [region, setRegion] = useState<(typeof REGIONS)[number]>("All");
+  useTick();
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ["live-jobs"],
     queryFn: () => fetchJobs(),
-    refetchInterval: 5 * 60 * 1000,
+    refetchInterval: 60_000,
     refetchOnWindowFocus: true,
   });
   const t = term.trim().toLowerCase();
@@ -35,7 +30,7 @@ export function LiveJobsFeed({ term }: { term: string }) {
           <Radio className={`h-4 w-4 text-primary ${isFetching ? "animate-pulse" : ""}`} /> Live global jobs
         </h2>
         <span className="text-[0.6rem] tracking-widest text-muted-foreground uppercase">
-          {data ? `Updated ${ago(data.fetchedAt)} · ${data.jobs.length}` : "Connecting…"}
+          {data ? `Updated ${timeAgo(data.fetchedAt)} · ${data.jobs.length}` : "Connecting…"}
         </span>
       </div>
       <div className="flex flex-wrap gap-2">
@@ -53,7 +48,9 @@ export function LiveJobsFeed({ term }: { term: string }) {
             <div className="min-w-0 flex-1">
               <h3 className="truncate text-sm font-semibold">{j.title}</h3>
               <p className="truncate text-xs text-muted-foreground">{j.company} · {j.type}</p>
-              <p className="mt-1 text-[0.65rem] text-muted-foreground">{j.location} · {ago(j.postedAt)} · via {j.source}</p>
+              <p className="mt-1 text-[0.65rem] text-muted-foreground">
+                {j.location} · {timeAgo(j.postedAt)} · via {j.source}
+              </p>
             </div>
             <ExternalLink className="h-4 w-4 shrink-0 text-primary/70" />
           </Plate>

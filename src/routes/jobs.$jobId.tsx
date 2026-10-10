@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Check, MapPin, ShieldCheck, X } from "lucide-react";
 import { Shell } from "@/components/Shell";
@@ -9,7 +9,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { matchJob, scoreBand } from "@/lib/matching";
 
+async function fetchJob(jobId: string) {
+  const { data, error } = await supabase.from("jobs").select("*").eq("id", jobId).maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
 export const Route = createFileRoute("/jobs/$jobId")({
+  // Prefetched on link hover so a vacancy opens instantly.
+  loader: ({ context, params }) =>
+    context.queryClient.prefetchQuery({
+      queryKey: ["job", params.jobId],
+      queryFn: () => fetchJob(params.jobId),
+    }),
   head: () => ({
     meta: [
       { title: "Vacancy Details & Auto-Match — WRCAN App" },
@@ -40,11 +52,7 @@ function JobDetail() {
 
   const { data: job } = useQuery({
     queryKey: ["job", jobId],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("jobs").select("*").eq("id", jobId).maybeSingle();
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => fetchJob(jobId),
   });
 
   const { data: application } = useQuery({
@@ -61,6 +69,20 @@ function JobDetail() {
       return data;
     },
   });
+
+  // Live: a recruiter moving this application along shows up without a refresh.
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`application-${jobId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "applications", filter: `job_id=eq.${jobId}` },
+        () => void qc.invalidateQueries({ queryKey: ["application", jobId] }),
+      )
+      .subscribe();
+    return () => void supabase.removeChannel(channel);
+  }, [jobId, user, qc]);
 
   if (!job) {
     return (
