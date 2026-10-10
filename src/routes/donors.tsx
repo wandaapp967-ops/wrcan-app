@@ -5,6 +5,8 @@ import { Download, HandCoins, HeartHandshake, TrendingUp, Users } from "lucide-r
 import { toast } from "sonner";
 import { z } from "zod";
 import { Shell } from "@/components/Shell";
+import { LivePulse } from "@/components/LiveBadge";
+import { timeAgo, useTick } from "@/lib/live-time";
 import { Field, Plate, RoseButton, areaClass, inputClass } from "@/components/EmpireUI";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -78,6 +80,7 @@ function StatCard({
 function DonorsPage() {
   const qc = useQueryClient();
   const { user, profile } = useAuth();
+  useTick();
 
   const { data: campaigns = [] } = useQuery({
     queryKey: ["donation_campaigns"],
@@ -94,7 +97,6 @@ function DonorsPage() {
 
   const { data: donations = [] } = useQuery({
     queryKey: ["donations"],
-    refetchInterval: 15000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("donations")
@@ -106,18 +108,29 @@ function DonorsPage() {
     },
   });
 
-  // Realtime feed
+  // Realtime feed: every pledge lands here the moment it is recorded — no polling.
   useEffect(() => {
     const channel = supabase
       .channel("donations-live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "donations" }, () => {
+      .on("postgres_changes", { event: "*", schema: "public", table: "donations" }, (payload) => {
         void qc.invalidateQueries({ queryKey: ["donations"] });
+        const row = payload.new as Donation | undefined;
+        if (payload.eventType === "INSERT" && row && row.donor_user_id !== user?.id) {
+          toast.success(
+            `New pledge: ${row.is_anonymous ? "Anonymous" : row.donor_name} · ${rand(Number(row.amount))}`,
+          );
+        }
       })
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "donation_campaigns" },
+        () => void qc.invalidateQueries({ queryKey: ["donation_campaigns"] }),
+      )
       .subscribe();
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [qc]);
+  }, [qc, user?.id]);
 
   const stats = useMemo(() => {
     const completed = donations.filter((d) => d.status === "completed");
@@ -396,6 +409,7 @@ function DonorsPage() {
               <Download className="h-3.5 w-3.5" /> CSV
             </RoseButton>
           </div>
+          <LivePulse>Live · last pledge {timeAgo(donations[0]?.created_at)}</LivePulse>
           <div className="max-h-80 space-y-2 overflow-y-auto pr-1">
             {donations.slice(0, 50).map((d) => (
               <div key={d.id} className="flex items-start justify-between gap-3 border-b border-border/60 pb-2">

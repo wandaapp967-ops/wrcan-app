@@ -12,6 +12,8 @@ import {
   Users,
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
+import { LivePulse } from "@/components/LiveBadge";
+import { timeAgo, useTick } from "@/lib/live-time";
 import { Plate } from "@/components/EmpireUI";
 import { supabase } from "@/integrations/supabase/client";
 import { useControlAccess } from "@/hooks/useBadges";
@@ -124,6 +126,7 @@ function ControlRoomPage() {
 
 function ControlRoomLive() {
   const qc = useQueryClient();
+  useTick();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["control-room-stats"],
@@ -132,10 +135,9 @@ function ControlRoomLive() {
       if (error) throw error;
       return data as unknown as Stats;
     },
-    refetchInterval: 15000,
   });
 
-  // Live refresh whenever anything moves in the network.
+  // Live refresh the moment anything moves in the network — no polling.
   useEffect(() => {
     const invalidate = () => qc.invalidateQueries({ queryKey: ["control-room-stats"] });
     const channel = supabase
@@ -144,6 +146,9 @@ function ControlRoomLive() {
       .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, invalidate)
       .on("postgres_changes", { event: "*", schema: "public", table: "talent_reels" }, invalidate)
       .on("postgres_changes", { event: "*", schema: "public", table: "applications" }, invalidate)
+      .on("postgres_changes", { event: "*", schema: "public", table: "certificates" }, invalidate)
+      .on("postgres_changes", { event: "*", schema: "public", table: "enrollments" }, invalidate)
+      .on("postgres_changes", { event: "*", schema: "public", table: "status_posts" }, invalidate)
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
@@ -163,13 +168,9 @@ function ControlRoomLive() {
         </Plate>
       ) : (
         <div className="space-y-6 pb-6">
-          <p className="flex items-center justify-center gap-2 text-[0.65rem] tracking-widest text-muted-foreground uppercase">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-70" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-            </span>
-            Live · updated {ago(data?.generated_at ?? null)}
-          </p>
+          <LivePulse className="justify-center">
+            Live · updated {timeAgo(data?.generated_at)}
+          </LivePulse>
 
           <div className="grid grid-cols-2 gap-3">
             <Stat

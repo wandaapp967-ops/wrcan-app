@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Briefcase, MapPin } from "lucide-react";
 import { Shell } from "@/components/Shell";
+import { CardSkeletonList } from "@/components/Skeleton";
 import { MatchRing, Plate, inputClass } from "@/components/EmpireUI";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,7 +12,20 @@ import { LiveJobsFeed } from "@/components/LiveJobsFeed";
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
+async function fetchActiveJobs() {
+  const { data, error } = await supabase
+    .from("jobs")
+    .select("*")
+    .eq("is_active", true)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
 export const Route = createFileRoute("/jobs")({
+  // Prefetched on link hover, so opening Vacancies shows content straight away.
+  loader: ({ context }) =>
+    context.queryClient.prefetchQuery({ queryKey: ["jobs"], queryFn: fetchActiveJobs }),
   head: () => ({
     meta: [
       { title: "Auto-Matched Jobs & Catering Vacancies — WRCAN App" },
@@ -42,15 +56,8 @@ function JobsPage() {
 
   const { data: jobs = [], isLoading } = useQuery({
     queryKey: ["jobs"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("jobs")
-        .select("*")
-        .eq("is_active", true)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
+    queryFn: fetchActiveJobs,
+    placeholderData: keepPreviousData,
   });
 
   const qc = useQueryClient();
@@ -118,9 +125,7 @@ function JobsPage() {
           </Plate>
         ) : null}
 
-        {isLoading ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">Loading vacancies…</p>
-        ) : null}
+        {isLoading ? <CardSkeletonList count={3} /> : null}
 
         {ranked.map(({ job, match }) => (
           <Link key={job.id} to="/jobs/$jobId" params={{ jobId: job.id }} className="block">

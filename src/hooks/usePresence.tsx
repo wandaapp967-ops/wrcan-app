@@ -5,24 +5,30 @@ import { useAuth } from "@/hooks/useAuth";
 type PresenceValue = {
   /** user ids currently connected to the Wanda network */
   online: Set<string>;
+  /** the same people, with the display name they are broadcasting */
+  onlineMembers: { id: string; name: string }[];
   isOnline: (id: string | null | undefined) => boolean;
   onlineCount: number;
 };
 
 const PresenceContext = createContext<PresenceValue>({
   online: new Set(),
+  onlineMembers: [],
   isOnline: () => false,
   onlineCount: 0,
 });
 
 /** Global "who is online" channel — one connection for the whole app. */
 export function PresenceProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [online, setOnline] = useState<Set<string>>(new Set());
+  const [names, setNames] = useState<Record<string, string>>({});
+  const name = profile?.full_name || "Member";
 
   useEffect(() => {
     if (!user) {
       setOnline(new Set());
+      setNames({});
       return;
     }
 
@@ -31,8 +37,13 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
     });
 
     const sync = () => {
-      const state = channel.presenceState();
+      const state = channel.presenceState<{ name?: string }>();
       setOnline(new Set(Object.keys(state)));
+      setNames(
+        Object.fromEntries(
+          Object.entries(state).map(([id, metas]) => [id, metas[0]?.name || "Member"]),
+        ),
+      );
     };
 
     channel
@@ -41,7 +52,7 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
       .on("presence", { event: "leave" }, sync)
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
-          void channel.track({ at: new Date().toISOString() });
+          void channel.track({ at: new Date().toISOString(), name });
         }
       });
 
@@ -62,15 +73,16 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
       touch();
       void supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, name]);
 
   const value = useMemo<PresenceValue>(
     () => ({
       online,
+      onlineMembers: [...online].map((id) => ({ id, name: names[id] || "Member" })),
       isOnline: (id) => (id ? online.has(id) : false),
       onlineCount: online.size,
     }),
-    [online],
+    [online, names],
   );
 
   return <PresenceContext.Provider value={value}>{children}</PresenceContext.Provider>;
