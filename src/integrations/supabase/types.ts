@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.15"
   }
   public: {
     Tables: {
@@ -95,6 +95,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      clock_logs: {
+        Row: {
+          clock_type: string
+          clocked_at: string
+          created_at: string
+          id: string
+          latitude: number
+          longitude: number
+          snapshot_path: string
+          user_id: string
+        }
+        Insert: {
+          clock_type: string
+          clocked_at?: string
+          created_at?: string
+          id?: string
+          latitude: number
+          longitude: number
+          snapshot_path: string
+          user_id: string
+        }
+        Update: {
+          clock_type?: string
+          clocked_at?: string
+          created_at?: string
+          id?: string
+          latitude?: number
+          longitude?: number
+          snapshot_path?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       conversation_participants: {
         Row: {
