@@ -23,6 +23,7 @@ import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/c
 import { Route as AuthenticatedControlRoomRouteImport } from './routes/_authenticated/control-room'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedStatusRouteImport } from './routes/_authenticated/status'
+import { Route as ApiWrcanHelperRouteImport } from './routes/api/wrcan-helper'
 import { Route as JobsJobIdRouteImport } from './routes/jobs.$jobId'
 import { Route as TrainingModuleIdRouteImport } from './routes/training.$moduleId'
 
@@ -97,6 +98,11 @@ const AuthenticatedStatusRoute = AuthenticatedStatusRouteImport.update({
   path: '/status',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiWrcanHelperRoute = ApiWrcanHelperRouteImport.update({
+  id: '/api/wrcan-helper',
+  path: '/api/wrcan-helper',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const JobsJobIdRoute = JobsJobIdRouteImport.update({
   id: '/$jobId',
   path: '/$jobId',
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/control-room': typeof AuthenticatedControlRoomRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/status': typeof AuthenticatedStatusRoute
+  '/api/wrcan-helper': typeof ApiWrcanHelperRoute
   '/jobs/$jobId': typeof JobsJobIdRoute
   '/training/$moduleId': typeof TrainingModuleIdRoute
 }
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/control-room': typeof AuthenticatedControlRoomRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/status': typeof AuthenticatedStatusRoute
+  '/api/wrcan-helper': typeof ApiWrcanHelperRoute
   '/jobs/$jobId': typeof JobsJobIdRoute
   '/training/$moduleId': typeof TrainingModuleIdRoute
 }
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/_authenticated/control-room': typeof AuthenticatedControlRoomRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/status': typeof AuthenticatedStatusRoute
+  '/api/wrcan-helper': typeof ApiWrcanHelperRoute
   '/jobs/$jobId': typeof JobsJobIdRoute
   '/training/$moduleId': typeof TrainingModuleIdRoute
 }
@@ -177,6 +186,7 @@ export interface FileRouteTypes {
     | '/control-room'
     | '/profile'
     | '/status'
+    | '/api/wrcan-helper'
     | '/jobs/$jobId'
     | '/training/$moduleId'
   fileRoutesByTo: FileRoutesByTo
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/control-room'
     | '/profile'
     | '/status'
+    | '/api/wrcan-helper'
     | '/jobs/$jobId'
     | '/training/$moduleId'
   id:
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/_authenticated/control-room'
     | '/_authenticated/profile'
     | '/_authenticated/status'
+    | '/api/wrcan-helper'
     | '/jobs/$jobId'
     | '/training/$moduleId'
   fileRoutesById: FileRoutesById
@@ -226,6 +238,7 @@ export interface RootRouteChildren {
   MediaStudioRoute: typeof MediaStudioRoute
   ReelsRoute: typeof ReelsRoute
   TrainingRoute: typeof TrainingRouteWithChildren
+  ApiWrcanHelperRoute: typeof ApiWrcanHelperRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -328,6 +341,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedStatusRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/wrcan-helper': {
+      id: '/api/wrcan-helper'
+      path: '/api/wrcan-helper'
+      fullPath: '/api/wrcan-helper'
+      preLoaderRoute: typeof ApiWrcanHelperRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/jobs/$jobId': {
       id: '/jobs/$jobId'
       path: '/$jobId'
@@ -396,6 +416,7 @@ const rootRouteChildren: RootRouteChildren = {
   MediaStudioRoute: MediaStudioRoute,
   ReelsRoute: ReelsRoute,
   TrainingRoute: TrainingRouteWithChildren,
+  ApiWrcanHelperRoute: ApiWrcanHelperRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -17,6 +17,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { BootScreen } from "@/components/BootScreen";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { NotificationBalloons } from "@/components/NotificationBalloons";
+import { WrcanHelper } from "@/components/WrcanHelper";
 
 
 function NotFoundComponent() {
@@ -144,6 +145,7 @@ function RootComponent() {
           <Outlet />
           <InstallPrompt />
           <NotificationBalloons />
+          <WrcanHelper />
           <Toaster position="top-center" richColors />
         </PresenceProvider>
       </AuthProvider>
