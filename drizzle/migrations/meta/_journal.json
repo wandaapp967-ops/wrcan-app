@@ -22,6 +22,20 @@
       "when": 1794302237762,
       "tag": "0002_create_private_clock_logs",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795516081041,
+      "tag": "0003_extend_bio_clock_shift_ledger",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795516121002,
+      "tag": "0004_record_clock_worker_identity",
+      "breakpoints": true
     }
   ]
 }

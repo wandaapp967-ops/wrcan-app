@@ -98,34 +98,58 @@ export type Database = {
       }
       clock_logs: {
         Row: {
+          attendance_hash: string | null
           clock_type: string
           clocked_at: string
           created_at: string
           id: string
           latitude: number
+          liveness_prompt_completed: boolean | null
           longitude: number
+          ppe_ready: boolean | null
+          pulse_bpm_estimate: number | null
           snapshot_path: string
           user_id: string
+          venue_label: string | null
+          venue_verified: boolean | null
+          worker_name: string | null
+          worker_role: string | null
         }
         Insert: {
+          attendance_hash?: string | null
           clock_type: string
           clocked_at?: string
           created_at?: string
           id?: string
           latitude: number
+          liveness_prompt_completed?: boolean | null
           longitude: number
+          ppe_ready?: boolean | null
+          pulse_bpm_estimate?: number | null
           snapshot_path: string
           user_id: string
+          venue_label?: string | null
+          venue_verified?: boolean | null
+          worker_name?: string | null
+          worker_role?: string | null
         }
         Update: {
+          attendance_hash?: string | null
           clock_type?: string
           clocked_at?: string
           created_at?: string
           id?: string
           latitude?: number
+          liveness_prompt_completed?: boolean | null
           longitude?: number
+          ppe_ready?: boolean | null
+          pulse_bpm_estimate?: number | null
           snapshot_path?: string
           user_id?: string
+          venue_label?: string | null
+          venue_verified?: boolean | null
+          worker_name?: string | null
+          worker_role?: string | null
         }
         Relationships: []
       }
