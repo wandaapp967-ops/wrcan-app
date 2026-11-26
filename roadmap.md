@@ -2,3 +2,6 @@
 - [x] Add a shareable online video classroom for students.
 - [x] Link the new page from the home screen and verify it.
 - [x] Enhance Live Studio with radio, teleprompter, vlogger and producer training desks.
+- [ ] Complete GPS-only Bio-Clock check-ins with a live ledger and navigation entry.
+- [ ] Resolve the reported WRCAN Helper preview errors, if still present.
+- [ ] Resolve three visibility findings after the requested privacy choices.

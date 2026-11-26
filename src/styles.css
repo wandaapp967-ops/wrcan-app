@@ -48,6 +48,14 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --color-bio-sapphire: var(--bio-sapphire);
+  --color-bio-gold: var(--bio-gold);
+  --color-bio-slate: var(--bio-slate);
+  --color-bio-slate-raised: var(--bio-slate-raised);
+  --color-bio-copy: var(--bio-copy);
+  --color-bio-muted: var(--bio-muted);
+  --color-bio-sapphire-foreground: var(--bio-sapphire-foreground);
+  --color-bio-gold-foreground: var(--bio-gold-foreground);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -62,6 +70,15 @@
 
 :root {
   --radius: 0.5rem;
+
+  --bio-sapphire: #0F52BA;
+  --bio-gold: #D4AF37;
+  --bio-slate: #111827;
+  --bio-slate-raised: #1B2638;
+  --bio-copy: #F3F4F6;
+  --bio-muted: #B6C0CE;
+  --bio-sapphire-foreground: #FFFFFF;
+  --bio-gold-foreground: #111827;
 
   --marble: oklch(0.16 0.008 80);
   --ink: oklch(0.95 0.03 90);

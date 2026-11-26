@@ -18,6 +18,7 @@ import { Route as LiveStudioRouteImport } from './routes/live-studio'
 import { Route as MediaStudioRouteImport } from './routes/media-studio'
 import { Route as ReelsRouteImport } from './routes/reels'
 import { Route as TrainingRouteImport } from './routes/training'
+import { Route as AuthenticatedBioClockRouteImport } from './routes/_authenticated/bio-clock'
 import { Route as AuthenticatedCertificatesRouteImport } from './routes/_authenticated/certificates'
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
 import { Route as AuthenticatedControlRoomRouteImport } from './routes/_authenticated/control-room'
@@ -71,6 +72,11 @@ const TrainingRoute = TrainingRouteImport.update({
   path: '/training',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedBioClockRoute = AuthenticatedBioClockRouteImport.update({
+  id: '/bio-clock',
+  path: '/bio-clock',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCertificatesRoute =
   AuthenticatedCertificatesRouteImport.update({
     id: '/certificates',
@@ -123,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/media-studio': typeof MediaStudioRoute
   '/reels': typeof ReelsRoute
   '/training': typeof TrainingRouteWithChildren
+  '/bio-clock': typeof AuthenticatedBioClockRoute
   '/certificates': typeof AuthenticatedCertificatesRoute
   '/chat': typeof AuthenticatedChatRoute
   '/control-room': typeof AuthenticatedControlRoomRoute
@@ -141,6 +148,7 @@ export interface FileRoutesByTo {
   '/media-studio': typeof MediaStudioRoute
   '/reels': typeof ReelsRoute
   '/training': typeof TrainingRouteWithChildren
+  '/bio-clock': typeof AuthenticatedBioClockRoute
   '/certificates': typeof AuthenticatedCertificatesRoute
   '/chat': typeof AuthenticatedChatRoute
   '/control-room': typeof AuthenticatedControlRoomRoute
@@ -161,6 +169,7 @@ export interface FileRoutesById {
   '/media-studio': typeof MediaStudioRoute
   '/reels': typeof ReelsRoute
   '/training': typeof TrainingRouteWithChildren
+  '/_authenticated/bio-clock': typeof AuthenticatedBioClockRoute
   '/_authenticated/certificates': typeof AuthenticatedCertificatesRoute
   '/_authenticated/chat': typeof AuthenticatedChatRoute
   '/_authenticated/control-room': typeof AuthenticatedControlRoomRoute
@@ -181,6 +190,7 @@ export interface FileRouteTypes {
     | '/media-studio'
     | '/reels'
     | '/training'
+    | '/bio-clock'
     | '/certificates'
     | '/chat'
     | '/control-room'
@@ -199,6 +209,7 @@ export interface FileRouteTypes {
     | '/media-studio'
     | '/reels'
     | '/training'
+    | '/bio-clock'
     | '/certificates'
     | '/chat'
     | '/control-room'
@@ -218,6 +229,7 @@ export interface FileRouteTypes {
     | '/media-studio'
     | '/reels'
     | '/training'
+    | '/_authenticated/bio-clock'
     | '/_authenticated/certificates'
     | '/_authenticated/chat'
     | '/_authenticated/control-room'
@@ -306,6 +318,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrainingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/bio-clock': {
+      id: '/_authenticated/bio-clock'
+      path: '/bio-clock'
+      fullPath: '/bio-clock'
+      preLoaderRoute: typeof AuthenticatedBioClockRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/certificates': {
       id: '/_authenticated/certificates'
       path: '/certificates'
@@ -366,6 +385,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedBioClockRoute: typeof AuthenticatedBioClockRoute
   AuthenticatedCertificatesRoute: typeof AuthenticatedCertificatesRoute
   AuthenticatedChatRoute: typeof AuthenticatedChatRoute
   AuthenticatedControlRoomRoute: typeof AuthenticatedControlRoomRoute
@@ -374,6 +394,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedBioClockRoute: AuthenticatedBioClockRoute,
   AuthenticatedCertificatesRoute: AuthenticatedCertificatesRoute,
   AuthenticatedChatRoute: AuthenticatedChatRoute,
   AuthenticatedControlRoomRoute: AuthenticatedControlRoomRoute,
